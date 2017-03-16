@@ -11,6 +11,7 @@ AC_PROG_CXX([g++])
 AM_PROG_AR
 AC_CHECK_TOOLS(CXX, [$CCC c++ g++ gcc CC cxx cc++ cl], gcc)
 AC_LANG([C])
+AC_CHECK_HEADER_STDBOOL
 
 CXXFLAGS="$CXXFLAGS -std=c++14"
 
@@ -84,5 +85,6 @@ CXXFLAGS="$CXXFLAGS -std=c++14"
 
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES(Makefile \
-                src/Makefile)
+                src/Makefile \
+                test/Makefile)
 AC_OUTPUT
