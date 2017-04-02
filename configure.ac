@@ -13,7 +13,8 @@ AC_CHECK_TOOLS(CXX, [$CCC c++ g++ gcc CC cxx cc++ cl], gcc)
 AC_LANG([C])
 AC_CHECK_HEADER_STDBOOL
 
-CXXFLAGS="$CXXFLAGS -std=c++14"
+CXXFLAGS="$CXXFLAGS -Wall -std=c++14"
+LIBS="-lpthread -lrt -lm $LIBS"
 
 ##########################################################################
 # check for ch-pal library

@@ -40,6 +40,8 @@
  *
  ******************************************************************************/
 
+#include <iostream>
+#include <string>
 #include <memory>
 #include <list>
 #include <unordered_map>
@@ -92,18 +94,71 @@ template<class T>
    };
 
 template<class T>
-   class MyClass
+   LinkedHashMap<T>::LinkedHashMap ()
    {
-   private:
-      T value;
-      public:
-      MyClass ();
-               ~MyClass ();
-      void
-      set (T value);
-      T
-      get ();
-   };
+      list = std::make_shared<std::list<T> > ();
+      map = std::make_shared<std::unordered_map<std::string, T> > ();
+   }
 
+template<class T>
+   LinkedHashMap<T>::~LinkedHashMap ()
+   {
+
+   }
+
+template<class T>
+   void
+   LinkedHashMap<T>::insert (std::string key, T value)
+   {
+      map->insert (std::make_pair (key, value));
+   }
+
+template<class T>
+   bool
+   LinkedHashMap<T>::has (std::string key)
+   {
+      return false;
+   }
+
+template<class T>
+   T
+   LinkedHashMap<T>::find (std::string key)
+   {
+      auto search = map->find (key);
+      return search->second;
+   }
+
+template<class T>
+   void
+   LinkedHashMap<T>::erase (std::string key)
+   {
+      map->erase (key);
+   }
+
+template<class T>
+   bool
+   LinkedHashMap<T>::empty ()
+   {
+      return map->empty ();
+   }
+
+template<class T>
+   size_t
+   LinkedHashMap<T>::size ()
+   {
+      return map->size ();
+   }
+
+template<class T>
+   void
+   LinkedHashMap<T>::print ()
+   {
+      for (auto iter = map->begin (); iter != map->end (); ++iter)
+      {
+         auto key = iter->first;
+         auto value = iter->second;
+         std::cout << key << " -> " << value << std::endl;
+      }
+   }
 
 #endif /* __SRC_UTILS_LINKED_HASH_MAP_HPP__ */

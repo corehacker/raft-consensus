@@ -86,7 +86,8 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-bin_PROGRAMS = test-linked-hash-map$(EXEEXT)
+bin_PROGRAMS = test-linked-hash-map$(EXEEXT) test-thread$(EXEEXT) \
+	test-thread-pool$(EXEEXT)
 subdir = test
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -105,6 +106,21 @@ am_test_linked_hash_map_OBJECTS =  \
 	../src/utils/test_linked_hash_map-linked-hash-map.$(OBJEXT)
 test_linked_hash_map_OBJECTS = $(am_test_linked_hash_map_OBJECTS)
 test_linked_hash_map_LDADD = $(LDADD)
+am_test_thread_OBJECTS = test_thread-test-thread.$(OBJEXT) \
+	../src/utils/test_thread-thread-job.$(OBJEXT) \
+	../src/utils/test_thread-thread.$(OBJEXT)
+test_thread_OBJECTS = $(am_test_thread_OBJECTS)
+test_thread_LDADD = $(LDADD)
+test_thread_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(test_thread_LDFLAGS) $(LDFLAGS) -o $@
+am_test_thread_pool_OBJECTS = test_thread_pool-test-thread.$(OBJEXT) \
+	../src/utils/test_thread_pool-thread-job.$(OBJEXT) \
+	../src/utils/test_thread_pool-thread.$(OBJEXT) \
+	../src/utils/test_thread_pool-thread-pool.$(OBJEXT)
+test_thread_pool_OBJECTS = $(am_test_thread_pool_OBJECTS)
+test_thread_pool_LDADD = $(LDADD)
+test_thread_pool_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(test_thread_pool_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_$(V))
 am__v_P_ = $(am__v_P_$(AM_DEFAULT_VERBOSITY))
 am__v_P_0 = false
@@ -138,8 +154,10 @@ AM_V_CXXLD = $(am__v_CXXLD_$(V))
 am__v_CXXLD_ = $(am__v_CXXLD_$(AM_DEFAULT_VERBOSITY))
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
-SOURCES = $(test_linked_hash_map_SOURCES)
-DIST_SOURCES = $(test_linked_hash_map_SOURCES)
+SOURCES = $(test_linked_hash_map_SOURCES) $(test_thread_SOURCES) \
+	$(test_thread_pool_SOURCES)
+DIST_SOURCES = $(test_linked_hash_map_SOURCES) $(test_thread_SOURCES) \
+	$(test_thread_pool_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -183,7 +201,7 @@ CPP = gcc -E
 CPPFLAGS = 
 CXX = g++
 CXXDEPMODE = depmode=gcc3
-CXXFLAGS = -g -O2 -std=c++14
+CXXFLAGS = -g -O2 -Wall -std=c++14
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
@@ -200,7 +218,7 @@ INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 LDFLAGS = 
 LIBOBJS = 
-LIBS = 
+LIBS = -lpthread -lrt -lm 
 LTLIBOBJS = 
 MAKEINFO = ${SHELL} /home/corehacker/workspace/git/raft-consensus/build-aux/missing makeinfo
 MKDIR_P = /bin/mkdir -p
@@ -264,6 +282,12 @@ top_builddir = ..
 top_srcdir = ..
 test_linked_hash_map_SOURCES = test-linked-hash-map.cpp ../src/utils/linked-hash-map.cpp
 test_linked_hash_map_CPPFLAGS = -I../src/utils
+test_thread_CPPFLAGS = -I../src/utils
+test_thread_LDFLAGS = 
+test_thread_SOURCES = test-thread.cpp ../src/utils/thread-job.cpp ../src/utils/thread.cpp
+test_thread_pool_CPPFLAGS = -I../src/utils
+test_thread_pool_LDFLAGS = 
+test_thread_pool_SOURCES = test-thread.cpp ../src/utils/thread-job.cpp ../src/utils/thread.cpp ../src/utils/thread-pool.cpp
 ACLOCAL_AMFLAGS = -I m4
 all: all-am
 
@@ -353,6 +377,29 @@ clean-binPROGRAMS:
 test-linked-hash-map$(EXEEXT): $(test_linked_hash_map_OBJECTS) $(test_linked_hash_map_DEPENDENCIES) $(EXTRA_test_linked_hash_map_DEPENDENCIES) 
 	@rm -f test-linked-hash-map$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(test_linked_hash_map_OBJECTS) $(test_linked_hash_map_LDADD) $(LIBS)
+../src/utils/test_thread-thread-job.$(OBJEXT):  \
+	../src/utils/$(am__dirstamp) \
+	../src/utils/$(DEPDIR)/$(am__dirstamp)
+../src/utils/test_thread-thread.$(OBJEXT):  \
+	../src/utils/$(am__dirstamp) \
+	../src/utils/$(DEPDIR)/$(am__dirstamp)
+
+test-thread$(EXEEXT): $(test_thread_OBJECTS) $(test_thread_DEPENDENCIES) $(EXTRA_test_thread_DEPENDENCIES) 
+	@rm -f test-thread$(EXEEXT)
+	$(AM_V_CXXLD)$(test_thread_LINK) $(test_thread_OBJECTS) $(test_thread_LDADD) $(LIBS)
+../src/utils/test_thread_pool-thread-job.$(OBJEXT):  \
+	../src/utils/$(am__dirstamp) \
+	../src/utils/$(DEPDIR)/$(am__dirstamp)
+../src/utils/test_thread_pool-thread.$(OBJEXT):  \
+	../src/utils/$(am__dirstamp) \
+	../src/utils/$(DEPDIR)/$(am__dirstamp)
+../src/utils/test_thread_pool-thread-pool.$(OBJEXT):  \
+	../src/utils/$(am__dirstamp) \
+	../src/utils/$(DEPDIR)/$(am__dirstamp)
+
+test-thread-pool$(EXEEXT): $(test_thread_pool_OBJECTS) $(test_thread_pool_DEPENDENCIES) $(EXTRA_test_thread_pool_DEPENDENCIES) 
+	@rm -f test-thread-pool$(EXEEXT)
+	$(AM_V_CXXLD)$(test_thread_pool_LINK) $(test_thread_pool_OBJECTS) $(test_thread_pool_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -362,7 +409,14 @@ distclean-compile:
 	-rm -f *.tab.c
 
 include ../src/utils/$(DEPDIR)/test_linked_hash_map-linked-hash-map.Po
+include ../src/utils/$(DEPDIR)/test_thread-thread-job.Po
+include ../src/utils/$(DEPDIR)/test_thread-thread.Po
+include ../src/utils/$(DEPDIR)/test_thread_pool-thread-job.Po
+include ../src/utils/$(DEPDIR)/test_thread_pool-thread-pool.Po
+include ../src/utils/$(DEPDIR)/test_thread_pool-thread.Po
 include ./$(DEPDIR)/test_linked_hash_map-test-linked-hash-map.Po
+include ./$(DEPDIR)/test_thread-test-thread.Po
+include ./$(DEPDIR)/test_thread_pool-test-thread.Po
 
 .cpp.o:
 	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -407,6 +461,104 @@ test_linked_hash_map-test-linked-hash-map.obj: test-linked-hash-map.cpp
 #	$(AM_V_CXX)source='../src/utils/linked-hash-map.cpp' object='../src/utils/test_linked_hash_map-linked-hash-map.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_linked_hash_map_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/utils/test_linked_hash_map-linked-hash-map.obj `if test -f '../src/utils/linked-hash-map.cpp'; then $(CYGPATH_W) '../src/utils/linked-hash-map.cpp'; else $(CYGPATH_W) '$(srcdir)/../src/utils/linked-hash-map.cpp'; fi`
+
+test_thread-test-thread.o: test-thread.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_thread_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT test_thread-test-thread.o -MD -MP -MF $(DEPDIR)/test_thread-test-thread.Tpo -c -o test_thread-test-thread.o `test -f 'test-thread.cpp' || echo '$(srcdir)/'`test-thread.cpp
+	$(AM_V_at)$(am__mv) $(DEPDIR)/test_thread-test-thread.Tpo $(DEPDIR)/test_thread-test-thread.Po
+#	$(AM_V_CXX)source='test-thread.cpp' object='test_thread-test-thread.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_thread_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o test_thread-test-thread.o `test -f 'test-thread.cpp' || echo '$(srcdir)/'`test-thread.cpp
+
+test_thread-test-thread.obj: test-thread.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_thread_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT test_thread-test-thread.obj -MD -MP -MF $(DEPDIR)/test_thread-test-thread.Tpo -c -o test_thread-test-thread.obj `if test -f 'test-thread.cpp'; then $(CYGPATH_W) 'test-thread.cpp'; else $(CYGPATH_W) '$(srcdir)/test-thread.cpp'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/test_thread-test-thread.Tpo $(DEPDIR)/test_thread-test-thread.Po
+#	$(AM_V_CXX)source='test-thread.cpp' object='test_thread-test-thread.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_thread_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o test_thread-test-thread.obj `if test -f 'test-thread.cpp'; then $(CYGPATH_W) 'test-thread.cpp'; else $(CYGPATH_W) '$(srcdir)/test-thread.cpp'; fi`
+
+../src/utils/test_thread-thread-job.o: ../src/utils/thread-job.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_thread_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../src/utils/test_thread-thread-job.o -MD -MP -MF ../src/utils/$(DEPDIR)/test_thread-thread-job.Tpo -c -o ../src/utils/test_thread-thread-job.o `test -f '../src/utils/thread-job.cpp' || echo '$(srcdir)/'`../src/utils/thread-job.cpp
+	$(AM_V_at)$(am__mv) ../src/utils/$(DEPDIR)/test_thread-thread-job.Tpo ../src/utils/$(DEPDIR)/test_thread-thread-job.Po
+#	$(AM_V_CXX)source='../src/utils/thread-job.cpp' object='../src/utils/test_thread-thread-job.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_thread_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/utils/test_thread-thread-job.o `test -f '../src/utils/thread-job.cpp' || echo '$(srcdir)/'`../src/utils/thread-job.cpp
+
+../src/utils/test_thread-thread-job.obj: ../src/utils/thread-job.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_thread_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../src/utils/test_thread-thread-job.obj -MD -MP -MF ../src/utils/$(DEPDIR)/test_thread-thread-job.Tpo -c -o ../src/utils/test_thread-thread-job.obj `if test -f '../src/utils/thread-job.cpp'; then $(CYGPATH_W) '../src/utils/thread-job.cpp'; else $(CYGPATH_W) '$(srcdir)/../src/utils/thread-job.cpp'; fi`
+	$(AM_V_at)$(am__mv) ../src/utils/$(DEPDIR)/test_thread-thread-job.Tpo ../src/utils/$(DEPDIR)/test_thread-thread-job.Po
+#	$(AM_V_CXX)source='../src/utils/thread-job.cpp' object='../src/utils/test_thread-thread-job.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_thread_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/utils/test_thread-thread-job.obj `if test -f '../src/utils/thread-job.cpp'; then $(CYGPATH_W) '../src/utils/thread-job.cpp'; else $(CYGPATH_W) '$(srcdir)/../src/utils/thread-job.cpp'; fi`
+
+../src/utils/test_thread-thread.o: ../src/utils/thread.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_thread_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../src/utils/test_thread-thread.o -MD -MP -MF ../src/utils/$(DEPDIR)/test_thread-thread.Tpo -c -o ../src/utils/test_thread-thread.o `test -f '../src/utils/thread.cpp' || echo '$(srcdir)/'`../src/utils/thread.cpp
+	$(AM_V_at)$(am__mv) ../src/utils/$(DEPDIR)/test_thread-thread.Tpo ../src/utils/$(DEPDIR)/test_thread-thread.Po
+#	$(AM_V_CXX)source='../src/utils/thread.cpp' object='../src/utils/test_thread-thread.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_thread_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/utils/test_thread-thread.o `test -f '../src/utils/thread.cpp' || echo '$(srcdir)/'`../src/utils/thread.cpp
+
+../src/utils/test_thread-thread.obj: ../src/utils/thread.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_thread_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../src/utils/test_thread-thread.obj -MD -MP -MF ../src/utils/$(DEPDIR)/test_thread-thread.Tpo -c -o ../src/utils/test_thread-thread.obj `if test -f '../src/utils/thread.cpp'; then $(CYGPATH_W) '../src/utils/thread.cpp'; else $(CYGPATH_W) '$(srcdir)/../src/utils/thread.cpp'; fi`
+	$(AM_V_at)$(am__mv) ../src/utils/$(DEPDIR)/test_thread-thread.Tpo ../src/utils/$(DEPDIR)/test_thread-thread.Po
+#	$(AM_V_CXX)source='../src/utils/thread.cpp' object='../src/utils/test_thread-thread.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_thread_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/utils/test_thread-thread.obj `if test -f '../src/utils/thread.cpp'; then $(CYGPATH_W) '../src/utils/thread.cpp'; else $(CYGPATH_W) '$(srcdir)/../src/utils/thread.cpp'; fi`
+
+test_thread_pool-test-thread.o: test-thread.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_thread_pool_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT test_thread_pool-test-thread.o -MD -MP -MF $(DEPDIR)/test_thread_pool-test-thread.Tpo -c -o test_thread_pool-test-thread.o `test -f 'test-thread.cpp' || echo '$(srcdir)/'`test-thread.cpp
+	$(AM_V_at)$(am__mv) $(DEPDIR)/test_thread_pool-test-thread.Tpo $(DEPDIR)/test_thread_pool-test-thread.Po
+#	$(AM_V_CXX)source='test-thread.cpp' object='test_thread_pool-test-thread.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_thread_pool_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o test_thread_pool-test-thread.o `test -f 'test-thread.cpp' || echo '$(srcdir)/'`test-thread.cpp
+
+test_thread_pool-test-thread.obj: test-thread.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_thread_pool_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT test_thread_pool-test-thread.obj -MD -MP -MF $(DEPDIR)/test_thread_pool-test-thread.Tpo -c -o test_thread_pool-test-thread.obj `if test -f 'test-thread.cpp'; then $(CYGPATH_W) 'test-thread.cpp'; else $(CYGPATH_W) '$(srcdir)/test-thread.cpp'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/test_thread_pool-test-thread.Tpo $(DEPDIR)/test_thread_pool-test-thread.Po
+#	$(AM_V_CXX)source='test-thread.cpp' object='test_thread_pool-test-thread.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_thread_pool_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o test_thread_pool-test-thread.obj `if test -f 'test-thread.cpp'; then $(CYGPATH_W) 'test-thread.cpp'; else $(CYGPATH_W) '$(srcdir)/test-thread.cpp'; fi`
+
+../src/utils/test_thread_pool-thread-job.o: ../src/utils/thread-job.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_thread_pool_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../src/utils/test_thread_pool-thread-job.o -MD -MP -MF ../src/utils/$(DEPDIR)/test_thread_pool-thread-job.Tpo -c -o ../src/utils/test_thread_pool-thread-job.o `test -f '../src/utils/thread-job.cpp' || echo '$(srcdir)/'`../src/utils/thread-job.cpp
+	$(AM_V_at)$(am__mv) ../src/utils/$(DEPDIR)/test_thread_pool-thread-job.Tpo ../src/utils/$(DEPDIR)/test_thread_pool-thread-job.Po
+#	$(AM_V_CXX)source='../src/utils/thread-job.cpp' object='../src/utils/test_thread_pool-thread-job.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_thread_pool_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/utils/test_thread_pool-thread-job.o `test -f '../src/utils/thread-job.cpp' || echo '$(srcdir)/'`../src/utils/thread-job.cpp
+
+../src/utils/test_thread_pool-thread-job.obj: ../src/utils/thread-job.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_thread_pool_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../src/utils/test_thread_pool-thread-job.obj -MD -MP -MF ../src/utils/$(DEPDIR)/test_thread_pool-thread-job.Tpo -c -o ../src/utils/test_thread_pool-thread-job.obj `if test -f '../src/utils/thread-job.cpp'; then $(CYGPATH_W) '../src/utils/thread-job.cpp'; else $(CYGPATH_W) '$(srcdir)/../src/utils/thread-job.cpp'; fi`
+	$(AM_V_at)$(am__mv) ../src/utils/$(DEPDIR)/test_thread_pool-thread-job.Tpo ../src/utils/$(DEPDIR)/test_thread_pool-thread-job.Po
+#	$(AM_V_CXX)source='../src/utils/thread-job.cpp' object='../src/utils/test_thread_pool-thread-job.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_thread_pool_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/utils/test_thread_pool-thread-job.obj `if test -f '../src/utils/thread-job.cpp'; then $(CYGPATH_W) '../src/utils/thread-job.cpp'; else $(CYGPATH_W) '$(srcdir)/../src/utils/thread-job.cpp'; fi`
+
+../src/utils/test_thread_pool-thread.o: ../src/utils/thread.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_thread_pool_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../src/utils/test_thread_pool-thread.o -MD -MP -MF ../src/utils/$(DEPDIR)/test_thread_pool-thread.Tpo -c -o ../src/utils/test_thread_pool-thread.o `test -f '../src/utils/thread.cpp' || echo '$(srcdir)/'`../src/utils/thread.cpp
+	$(AM_V_at)$(am__mv) ../src/utils/$(DEPDIR)/test_thread_pool-thread.Tpo ../src/utils/$(DEPDIR)/test_thread_pool-thread.Po
+#	$(AM_V_CXX)source='../src/utils/thread.cpp' object='../src/utils/test_thread_pool-thread.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_thread_pool_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/utils/test_thread_pool-thread.o `test -f '../src/utils/thread.cpp' || echo '$(srcdir)/'`../src/utils/thread.cpp
+
+../src/utils/test_thread_pool-thread.obj: ../src/utils/thread.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_thread_pool_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../src/utils/test_thread_pool-thread.obj -MD -MP -MF ../src/utils/$(DEPDIR)/test_thread_pool-thread.Tpo -c -o ../src/utils/test_thread_pool-thread.obj `if test -f '../src/utils/thread.cpp'; then $(CYGPATH_W) '../src/utils/thread.cpp'; else $(CYGPATH_W) '$(srcdir)/../src/utils/thread.cpp'; fi`
+	$(AM_V_at)$(am__mv) ../src/utils/$(DEPDIR)/test_thread_pool-thread.Tpo ../src/utils/$(DEPDIR)/test_thread_pool-thread.Po
+#	$(AM_V_CXX)source='../src/utils/thread.cpp' object='../src/utils/test_thread_pool-thread.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_thread_pool_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/utils/test_thread_pool-thread.obj `if test -f '../src/utils/thread.cpp'; then $(CYGPATH_W) '../src/utils/thread.cpp'; else $(CYGPATH_W) '$(srcdir)/../src/utils/thread.cpp'; fi`
+
+../src/utils/test_thread_pool-thread-pool.o: ../src/utils/thread-pool.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_thread_pool_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../src/utils/test_thread_pool-thread-pool.o -MD -MP -MF ../src/utils/$(DEPDIR)/test_thread_pool-thread-pool.Tpo -c -o ../src/utils/test_thread_pool-thread-pool.o `test -f '../src/utils/thread-pool.cpp' || echo '$(srcdir)/'`../src/utils/thread-pool.cpp
+	$(AM_V_at)$(am__mv) ../src/utils/$(DEPDIR)/test_thread_pool-thread-pool.Tpo ../src/utils/$(DEPDIR)/test_thread_pool-thread-pool.Po
+#	$(AM_V_CXX)source='../src/utils/thread-pool.cpp' object='../src/utils/test_thread_pool-thread-pool.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_thread_pool_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/utils/test_thread_pool-thread-pool.o `test -f '../src/utils/thread-pool.cpp' || echo '$(srcdir)/'`../src/utils/thread-pool.cpp
+
+../src/utils/test_thread_pool-thread-pool.obj: ../src/utils/thread-pool.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_thread_pool_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../src/utils/test_thread_pool-thread-pool.obj -MD -MP -MF ../src/utils/$(DEPDIR)/test_thread_pool-thread-pool.Tpo -c -o ../src/utils/test_thread_pool-thread-pool.obj `if test -f '../src/utils/thread-pool.cpp'; then $(CYGPATH_W) '../src/utils/thread-pool.cpp'; else $(CYGPATH_W) '$(srcdir)/../src/utils/thread-pool.cpp'; fi`
+	$(AM_V_at)$(am__mv) ../src/utils/$(DEPDIR)/test_thread_pool-thread-pool.Tpo ../src/utils/$(DEPDIR)/test_thread_pool-thread-pool.Po
+#	$(AM_V_CXX)source='../src/utils/thread-pool.cpp' object='../src/utils/test_thread_pool-thread-pool.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_thread_pool_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/utils/test_thread_pool-thread-pool.obj `if test -f '../src/utils/thread-pool.cpp'; then $(CYGPATH_W) '../src/utils/thread-pool.cpp'; else $(CYGPATH_W) '$(srcdir)/../src/utils/thread-pool.cpp'; fi`
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique

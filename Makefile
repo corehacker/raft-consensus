@@ -219,7 +219,7 @@ CPP = gcc -E
 CPPFLAGS = 
 CXX = g++
 CXXDEPMODE = depmode=gcc3
-CXXFLAGS = -g -O2 -std=c++14
+CXXFLAGS = -g -O2 -Wall -std=c++14
 CYGPATH_W = echo
 DEFS = -DHAVE_CONFIG_H
 DEPDIR = .deps
@@ -236,7 +236,7 @@ INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 LDFLAGS = 
 LIBOBJS = 
-LIBS = 
+LIBS = -lpthread -lrt -lm 
 LTLIBOBJS = 
 MAKEINFO = ${SHELL} /home/corehacker/workspace/git/raft-consensus/build-aux/missing makeinfo
 MKDIR_P = /bin/mkdir -p
