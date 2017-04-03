@@ -14,6 +14,6 @@ test_thread_pool_CPPFLAGS = -I../src/utils
 
 test_thread_pool_LDFLAGS =
 
-test_thread_pool_SOURCES = test-thread.cpp ../src/utils/thread-job.cpp ../src/utils/thread.cpp ../src/utils/thread-pool.cpp
+test_thread_pool_SOURCES = test-thread-pool.cpp ../src/utils/thread-job.cpp ../src/utils/thread.cpp ../src/utils/thread-pool.cpp
 
 ACLOCAL_AMFLAGS = -I m4
