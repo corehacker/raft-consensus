@@ -57,12 +57,15 @@
 /************************ STATIC FUNCTION PROTOTYPES **************************/
 
 /****************************** LOCAL FUNCTIONS *******************************/
-int main () {
+int
+main ()
+{
    // LinkedHashMap<std::string> *map = new LinkedHashMap<std::string> ();
 
-   std::shared_ptr < LinkedHashMap <std::string> > map = std::make_shared < LinkedHashMap <std::string> > ();
-   map->insert("sandeep", "prakash");
-   map->insert("key", "value");
+   std::shared_ptr<LinkedHashMap<std::string> > map = std::make_shared<
+         LinkedHashMap<std::string> > ();
+   map->insert ("sandeep", "prakash");
+   map->insert ("key", "value");
    map->print ();
    // cout << "Size: " << map->size() << endl;
 

@@ -46,6 +46,7 @@
 #include <mutex>
 #include <condition_variable>
 #include "thread-job.hpp"
+#include "thread-get-job.hpp"
 
 #ifndef __SRC_UTILS_THREAD_HPP__
 #define __SRC_UTILS_THREAD_HPP__
@@ -58,19 +59,18 @@
 
 /*********************** CLASS/STRUCTURE/UNION DATA TYPES *********************/
 class Thread {
-  public:
-    Thread ();
-    ~Thread ();
-    void addJob (ThreadJob &job);
-  private:
-    std::deque <ThreadJob>  *mJobQueue;
-    std::mutex              mMutex;
-    std::condition_variable *mCondition;
-    pthread_t                mThread;
+   public:
+      Thread (ThreadGetJob getJob, void *this_);
+      ~Thread ();
+      void addJob (ThreadJob &job);
+   private:
+      pthread_t mThread;
+      ThreadGetJob mGetJob;
+      void *mGetJobThis;
 
-    static void *threadFunc (void *this_);
-    void run ();
-    void runJob (ThreadJob &job);
+      static void *threadFunc (void *this_);
+      void run ();
+      void runJob (ThreadJob &job);
 };
 
 /***************************** FUNCTION PROTOTYPES ****************************/

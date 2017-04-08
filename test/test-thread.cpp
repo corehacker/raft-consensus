@@ -59,23 +59,27 @@
 /****************************** LOCAL FUNCTIONS *******************************/
 using namespace std;
 
-void *routine (void *arg) {
-  cout << std::this_thread::get_id () << " Running Job Routine" << endl;
+void *
+routine (void *arg)
+{
+   cout << std::this_thread::get_id () << " Running Job Routine" << endl;
 
-  return NULL;
+   return NULL;
 }
 
-int main () {
-   Thread *thread = new Thread ();
-
-   std::chrono::milliseconds ms(1000);
-   std::this_thread::sleep_for(ms);
-   ThreadJob job = ThreadJob (routine, NULL);
-
-   while (true) {
-     thread->addJob(job);
-
-     std::this_thread::sleep_for(ms);
-   }
+int
+main ()
+{
+//   Thread *thread = new Thread ();
+//
+//   std::chrono::milliseconds ms(1000);
+//   std::this_thread::sleep_for(ms);
+//   ThreadJob job = ThreadJob (routine, NULL);
+//
+//   while (true) {
+//     thread->addJob(job);
+//
+//     std::this_thread::sleep_for(ms);
+//   }
    return 0;
 }

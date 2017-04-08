@@ -58,50 +58,37 @@
 /****************************** LOCAL FUNCTIONS *******************************/
 using namespace std;
 
-void *Thread::threadFunc (void *this_) {
-  Thread *t = (Thread *) this_;
-  t->run();
-  return NULL;
+void *
+Thread::threadFunc (void *this_)
+{
+   Thread *t = (Thread *) this_;
+   t->run ();
+   return NULL;
 }
 
-void Thread::run () {
-  cout << "Entering thread func 1" << endl;
-  while (true) {
-    if (!mJobQueue->empty ()) {
-      cout << "New Job" << endl;
-      mMutex.lock ();
-      ThreadJob job = mJobQueue->at(0);
-      mJobQueue->pop_front();
-      mMutex.unlock ();
-      runJob (job);
-
-    }
-    else {
-      cout << "Waiting for job" << endl;
-      std::unique_lock<std::mutex> lk (mMutex);
-      mCondition->wait(lk);
-    }
-  }
+void
+Thread::run ()
+{
+   cout << "Entering thread func 1" << endl;
+   ThreadJob job = mGetJob (mGetJobThis);
+   runJob (job);
 }
 
-void Thread::runJob (ThreadJob &job) {
-  cout << "Running new job" << endl;
-  job.routine (job.arg);
+void
+Thread::runJob (ThreadJob &job)
+{
+   cout << "Running new job" << endl;
+   job.routine (job.arg);
 }
 
-void Thread::addJob (ThreadJob &job) {
-  cout << "Adding Job" << endl;
-  std::lock_guard<std::mutex> lock(mMutex);
-  mJobQueue->push_back(job);
-  mCondition->notify_one();
+Thread::Thread (ThreadGetJob getJob, void *this_)
+{
+   cout << "Creating thread" << endl;
+   mGetJob = getJob;
+   mGetJobThis = this_;
+   pthread_create (&mThread, NULL, Thread::threadFunc, this);
 }
 
-Thread::Thread () :
-  mMutex () {
-  mCondition = new std::condition_variable ();
-  mJobQueue = new std::deque <ThreadJob> ();
-  pthread_create(&mThread, NULL, Thread::threadFunc, this);
-}
-
-Thread::~Thread () {
+Thread::~Thread ()
+{
 }

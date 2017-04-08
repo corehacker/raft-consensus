@@ -50,6 +50,8 @@
 #include <stdlib.h>
 
 #include "thread-job.hpp"
+#include "thread-get-job.hpp"
+#include "thread.hpp"
 
 #ifndef __SRC_UTILS_THREAD_POOL_HPP__
 #define __SRC_UTILS_THREAD_POOL_HPP__
@@ -62,21 +64,23 @@
 /******************************** ENUMERATIONS ********************************/
 
 /*********************** CLASS/STRUCTURE/UNION DATA TYPES *********************/
-class ThreadPool {
-  public:
-    ThreadPool (uint32_t uiCount = THREAD_POOL_DEFAULT_COUNT);
-    ~ThreadPool ();
-    void addJob (ThreadJob &job);
-  private:
-    std::deque <ThreadJob>  mJobQueue;
-    std::mutex              mMutex;
-    std::condition_variable mCondition;
-    std::vector <pthread_t> mThreads;
-    uint32_t                uiCount;
+class ThreadPool
+{
+   public:
+      ThreadPool (uint32_t uiCount = THREAD_POOL_DEFAULT_COUNT);
+      ~ThreadPool ();
+      void addJob (ThreadJob &job);
+   private:
+      std::deque<ThreadJob> mJobQueue;
+      std::mutex mMutex;
+      std::condition_variable mCondition;
+      std::vector<Thread *> mThreads;
+      uint32_t uiCount;
 
-    static void *threadPoolFunc (void *this_);
-    void run ();
-    void runJob (ThreadJob &job);
+      ThreadJob &
+      threadGetNextJob_ ();
+      static ThreadJob &
+      threadGetNextJob (void *this_);
 };
 
 /***************************** FUNCTION PROTOTYPES ****************************/

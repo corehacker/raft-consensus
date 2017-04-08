@@ -55,11 +55,13 @@
 /****************************** LOCAL FUNCTIONS *******************************/
 #include "thread-job.hpp"
 
-ThreadJob::ThreadJob(ThreadJobRoutine routine, void *arg) {
-  this->routine = routine;
-  this->arg = arg;
+ThreadJob::ThreadJob (ThreadJobRoutine routine, void *arg)
+{
+   this->routine = routine;
+   this->arg = arg;
 }
 
-ThreadJob::~ThreadJob() {
-  this->routine = NULL;
+ThreadJob::~ThreadJob ()
+{
+   this->routine = NULL;
 }

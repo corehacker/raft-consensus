@@ -55,11 +55,11 @@
 typedef void * (*ThreadJobRoutine) (void *arg);
 
 class ThreadJob {
-  public:
-    ThreadJobRoutine routine;
-    void *arg;
-    ThreadJob (ThreadJobRoutine routine, void *arg);
-    ~ThreadJob ();
+   public:
+      ThreadJobRoutine routine;
+      void *arg;
+      ThreadJob (ThreadJobRoutine routine, void *arg);
+      ~ThreadJob ();
 };
 
 /***************************** FUNCTION PROTOTYPES ****************************/

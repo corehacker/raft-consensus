@@ -59,24 +59,62 @@
 /****************************** LOCAL FUNCTIONS *******************************/
 using namespace std;
 
-void *ThreadPool::threadPoolFunc (void *this_) {
-  cout << std::this_thread::get_id() << " Running thread" << endl;
-  return NULL;
+ThreadPool::ThreadPool (uint32_t uiCount) :
+      mJobQueue (),
+         mMutex (),
+         mCondition (),
+         mThreads ()
+{
+   this->uiCount = uiCount;
+
+   for (uint32_t uiIndex = 0; uiIndex < uiCount; uiIndex++)
+   {
+      mThreads.push_back (new Thread (ThreadPool::threadGetNextJob, this));
+   }
 }
 
-ThreadPool::ThreadPool(uint32_t uiCount) :
-    mJobQueue (),
-    mMutex (),
-    mCondition (),
-    mThreads () {
-  this->uiCount = uiCount;
+ThreadPool::~ThreadPool ()
+{
 
-  for (uint32_t uiIndex = 0; uiIndex < uiCount; uiIndex++) {
-    pthread_t id = 0;
-    pthread_create(&id, NULL, ThreadPool::threadPoolFunc, this);
-  }
 }
 
-ThreadPool::~ThreadPool() {
+void
+ThreadPool::addJob (ThreadJob &job)
+{
+   cout << "Adding Job" << endl;
+   std::lock_guard < std::mutex > lock (mMutex);
+   mJobQueue.push_back (job);
+   mCondition.notify_one ();
+}
 
+ThreadJob &
+ThreadPool::threadGetNextJob_ ()
+{
+   cout << "Entering thread func 1" << endl;
+   while (true)
+   {
+      if (!mJobQueue.empty ())
+      {
+         cout << "New Job" << endl;
+         mMutex.lock ();
+         ThreadJob &job = mJobQueue.at (0);
+         mJobQueue.pop_front ();
+         mMutex.unlock ();
+         return job;
+
+      }
+      else
+      {
+         cout << "Waiting for job" << endl;
+         std::unique_lock < std::mutex > lk (mMutex);
+         mCondition.wait (lk);
+      }
+   }
+}
+
+ThreadJob &
+ThreadPool::threadGetNextJob (void *this_)
+{
+   ThreadPool *this__ = (ThreadPool *) this_;
+   return this__->threadGetNextJob_ ();
 }

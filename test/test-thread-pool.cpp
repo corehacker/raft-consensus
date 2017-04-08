@@ -41,6 +41,9 @@
  ******************************************************************************/
 
 /********************************** INCLUDES **********************************/
+#include <iostream>
+#include <thread>
+#include <chrono>
 #include "thread-pool.hpp"
 
 /********************************* CONSTANTS **********************************/
@@ -54,6 +57,23 @@
 /************************ STATIC FUNCTION PROTOTYPES **************************/
 
 /****************************** LOCAL FUNCTIONS *******************************/
-int main () {
+using namespace std;
+
+void *
+routine (void *arg)
+{
+   cout << std::this_thread::get_id () << " Running Job Routine" << endl;
+
+   return NULL;
+}
+
+int
+main ()
+{
+   ThreadPool *pool = new ThreadPool ();
+
+   ThreadJob job = ThreadJob (routine, NULL);
+
+   pool->addJob(job);
    return 0;
 }
