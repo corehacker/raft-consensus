@@ -44,6 +44,7 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
+#include "logger.hpp"
 #include "thread-pool.hpp"
 
 /********************************* CONSTANTS **********************************/
@@ -58,6 +59,8 @@
 
 /****************************** LOCAL FUNCTIONS *******************************/
 using namespace std;
+
+static Logger &log = Logger::getInstance();
 
 ThreadPool::ThreadPool (uint32_t uiCount) :
       mJobQueue (),
@@ -81,7 +84,7 @@ ThreadPool::~ThreadPool ()
 void
 ThreadPool::addJob (ThreadJob &job)
 {
-   cout << "Adding Job" << endl;
+   LOG << "Adding Job" << std::endl;
    std::lock_guard < std::mutex > lock (mMutex);
    mJobQueue.push_back (job);
    mCondition.notify_one ();
@@ -90,12 +93,12 @@ ThreadPool::addJob (ThreadJob &job)
 ThreadJob &
 ThreadPool::threadGetNextJob_ ()
 {
-   cout << "Entering thread func 1" << endl;
+   LOG << "Entering thread func 1" << std::endl;
    while (true)
    {
       if (!mJobQueue.empty ())
       {
-         cout << "New Job" << endl;
+         LOG << "New Job" << std::endl;
          mMutex.lock ();
          ThreadJob &job = mJobQueue.at (0);
          mJobQueue.pop_front ();
@@ -105,7 +108,7 @@ ThreadPool::threadGetNextJob_ ()
       }
       else
       {
-         cout << "Waiting for job" << endl;
+         LOG << "Waiting for job" << std::endl;
          std::unique_lock < std::mutex > lk (mMutex);
          mCondition.wait (lk);
       }

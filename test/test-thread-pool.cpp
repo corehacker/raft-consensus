@@ -45,6 +45,7 @@
 #include <thread>
 #include <chrono>
 #include "thread-pool.hpp"
+#include "logger.hpp"
 
 /********************************* CONSTANTS **********************************/
 
@@ -59,10 +60,12 @@
 /****************************** LOCAL FUNCTIONS *******************************/
 using namespace std;
 
+static Logger &log = Logger::getInstance();
+
 void *
 routine (void *arg)
 {
-   cout << std::this_thread::get_id () << " Running Job Routine" << endl;
+   LOG << std::this_thread::get_id () << " Running Job Routine" << std::endl;
 
    return NULL;
 }
@@ -71,9 +74,18 @@ int
 main ()
 {
    ThreadPool *pool = new ThreadPool ();
+   uint32_t uiCount = 0;
 
+   std::chrono::milliseconds ms(1000);
+   std::this_thread::sleep_for(ms);
    ThreadJob job = ThreadJob (routine, NULL);
 
-   pool->addJob(job);
+   while (true) {
+      pool->addJob(job);
+
+      std::this_thread::sleep_for(ms);
+      if (uiCount++ == 10) break;
+   }
+
    return 0;
 }

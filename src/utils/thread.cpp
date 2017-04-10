@@ -42,7 +42,7 @@
 
 /********************************** INCLUDES **********************************/
 #include <iostream>
-
+#include "logger.hpp"
 #include "thread.hpp"
 
 /********************************* CONSTANTS **********************************/
@@ -58,6 +58,8 @@
 /****************************** LOCAL FUNCTIONS *******************************/
 using namespace std;
 
+static Logger &log = Logger::getInstance();
+
 void *
 Thread::threadFunc (void *this_)
 {
@@ -69,21 +71,23 @@ Thread::threadFunc (void *this_)
 void
 Thread::run ()
 {
-   cout << "Entering thread func 1" << endl;
-   ThreadJob job = mGetJob (mGetJobThis);
-   runJob (job);
+   LOG << "Entering thread func 1" << std::endl;
+   while (true) {
+      ThreadJob job = mGetJob (mGetJobThis);
+      runJob (job);
+   }
 }
 
 void
 Thread::runJob (ThreadJob &job)
 {
-   cout << "Running new job" << endl;
+   LOG << "Running new job" << std::endl;
    job.routine (job.arg);
 }
 
 Thread::Thread (ThreadGetJob getJob, void *this_)
 {
-   cout << "Creating thread" << endl;
+   LOG << "Creating thread" << std::endl;
    mGetJob = getJob;
    mGetJobThis = this_;
    pthread_create (&mThread, NULL, Thread::threadFunc, this);
