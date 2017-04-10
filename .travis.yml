@@ -1,0 +1,13 @@
+language: c++
+
+compiler:
+  - gcc
+
+script: |
+  autoreconf --install
+  ./configure
+  make
+  
+notifications:
+  email:
+    - 123sandy@gmail.com
