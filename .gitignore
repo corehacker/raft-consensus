@@ -7,3 +7,4 @@ autoscan.log
 configure.scan
 .cproject
 *.o
+/config.h.in~
