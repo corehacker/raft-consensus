@@ -11,7 +11,7 @@ AC_PROG_CXX([g++])
 AM_PROG_AR
 AC_CHECK_TOOLS(CXX, [$CCC c++ g++ gcc CC cxx cc++ cl], gcc)
 AC_LANG([C])
-AC_CHECK_HEADER_STDBOOL
+# AC_CHECK_HEADER_STDBOOL
 
 CXXFLAGS="$CXXFLAGS -Wall -std=c++14"
 LIBS="-lpthread -lrt -lm $LIBS"
