@@ -100,15 +100,14 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am__dirstamp = $(am__leading_dot)dirstamp
 am_test_linked_hash_map_OBJECTS =  \
-	test_linked_hash_map-test-linked-hash-map.$(OBJEXT) \
-	../src/utils/test_linked_hash_map-linked-hash-map.$(OBJEXT)
+	test_linked_hash_map-test-linked-hash-map.$(OBJEXT)
 test_linked_hash_map_OBJECTS = $(am_test_linked_hash_map_OBJECTS)
 test_linked_hash_map_LDADD = $(LDADD)
 am_test_logger_OBJECTS = test_logger-test-logger.$(OBJEXT)
 test_logger_OBJECTS = $(am_test_logger_OBJECTS)
 test_logger_LDADD = $(LDADD)
+am__dirstamp = $(am__leading_dot)dirstamp
 am_test_thread_OBJECTS = test_thread-test-thread.$(OBJEXT) \
 	../src/utils/test_thread-thread-job.$(OBJEXT) \
 	../src/utils/test_thread-thread.$(OBJEXT)
@@ -284,7 +283,7 @@ target_alias =
 top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
-test_linked_hash_map_SOURCES = test-linked-hash-map.cpp ../src/utils/linked-hash-map.cpp
+test_linked_hash_map_SOURCES = test-linked-hash-map.cpp
 test_linked_hash_map_CPPFLAGS = -I../src/utils
 test_thread_CPPFLAGS = -I../src/utils
 test_thread_LDFLAGS = 
@@ -370,15 +369,6 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
-../src/utils/$(am__dirstamp):
-	@$(MKDIR_P) ../src/utils
-	@: > ../src/utils/$(am__dirstamp)
-../src/utils/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) ../src/utils/$(DEPDIR)
-	@: > ../src/utils/$(DEPDIR)/$(am__dirstamp)
-../src/utils/test_linked_hash_map-linked-hash-map.$(OBJEXT):  \
-	../src/utils/$(am__dirstamp) \
-	../src/utils/$(DEPDIR)/$(am__dirstamp)
 
 test-linked-hash-map$(EXEEXT): $(test_linked_hash_map_OBJECTS) $(test_linked_hash_map_DEPENDENCIES) $(EXTRA_test_linked_hash_map_DEPENDENCIES) 
 	@rm -f test-linked-hash-map$(EXEEXT)
@@ -387,6 +377,12 @@ test-linked-hash-map$(EXEEXT): $(test_linked_hash_map_OBJECTS) $(test_linked_has
 test-logger$(EXEEXT): $(test_logger_OBJECTS) $(test_logger_DEPENDENCIES) $(EXTRA_test_logger_DEPENDENCIES) 
 	@rm -f test-logger$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(test_logger_OBJECTS) $(test_logger_LDADD) $(LIBS)
+../src/utils/$(am__dirstamp):
+	@$(MKDIR_P) ../src/utils
+	@: > ../src/utils/$(am__dirstamp)
+../src/utils/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) ../src/utils/$(DEPDIR)
+	@: > ../src/utils/$(DEPDIR)/$(am__dirstamp)
 ../src/utils/test_thread-thread-job.$(OBJEXT):  \
 	../src/utils/$(am__dirstamp) \
 	../src/utils/$(DEPDIR)/$(am__dirstamp)
@@ -418,7 +414,6 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-include ../src/utils/$(DEPDIR)/test_linked_hash_map-linked-hash-map.Po
 include ../src/utils/$(DEPDIR)/test_thread-thread-job.Po
 include ../src/utils/$(DEPDIR)/test_thread-thread.Po
 include ../src/utils/$(DEPDIR)/test_thread_pool-thread-job.Po
@@ -458,20 +453,6 @@ test_linked_hash_map-test-linked-hash-map.obj: test-linked-hash-map.cpp
 #	$(AM_V_CXX)source='test-linked-hash-map.cpp' object='test_linked_hash_map-test-linked-hash-map.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_linked_hash_map_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o test_linked_hash_map-test-linked-hash-map.obj `if test -f 'test-linked-hash-map.cpp'; then $(CYGPATH_W) 'test-linked-hash-map.cpp'; else $(CYGPATH_W) '$(srcdir)/test-linked-hash-map.cpp'; fi`
-
-../src/utils/test_linked_hash_map-linked-hash-map.o: ../src/utils/linked-hash-map.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_linked_hash_map_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../src/utils/test_linked_hash_map-linked-hash-map.o -MD -MP -MF ../src/utils/$(DEPDIR)/test_linked_hash_map-linked-hash-map.Tpo -c -o ../src/utils/test_linked_hash_map-linked-hash-map.o `test -f '../src/utils/linked-hash-map.cpp' || echo '$(srcdir)/'`../src/utils/linked-hash-map.cpp
-	$(AM_V_at)$(am__mv) ../src/utils/$(DEPDIR)/test_linked_hash_map-linked-hash-map.Tpo ../src/utils/$(DEPDIR)/test_linked_hash_map-linked-hash-map.Po
-#	$(AM_V_CXX)source='../src/utils/linked-hash-map.cpp' object='../src/utils/test_linked_hash_map-linked-hash-map.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_linked_hash_map_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/utils/test_linked_hash_map-linked-hash-map.o `test -f '../src/utils/linked-hash-map.cpp' || echo '$(srcdir)/'`../src/utils/linked-hash-map.cpp
-
-../src/utils/test_linked_hash_map-linked-hash-map.obj: ../src/utils/linked-hash-map.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_linked_hash_map_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../src/utils/test_linked_hash_map-linked-hash-map.obj -MD -MP -MF ../src/utils/$(DEPDIR)/test_linked_hash_map-linked-hash-map.Tpo -c -o ../src/utils/test_linked_hash_map-linked-hash-map.obj `if test -f '../src/utils/linked-hash-map.cpp'; then $(CYGPATH_W) '../src/utils/linked-hash-map.cpp'; else $(CYGPATH_W) '$(srcdir)/../src/utils/linked-hash-map.cpp'; fi`
-	$(AM_V_at)$(am__mv) ../src/utils/$(DEPDIR)/test_linked_hash_map-linked-hash-map.Tpo ../src/utils/$(DEPDIR)/test_linked_hash_map-linked-hash-map.Po
-#	$(AM_V_CXX)source='../src/utils/linked-hash-map.cpp' object='../src/utils/test_linked_hash_map-linked-hash-map.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_linked_hash_map_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/utils/test_linked_hash_map-linked-hash-map.obj `if test -f '../src/utils/linked-hash-map.cpp'; then $(CYGPATH_W) '../src/utils/linked-hash-map.cpp'; else $(CYGPATH_W) '$(srcdir)/../src/utils/linked-hash-map.cpp'; fi`
 
 test_logger-test-logger.o: test-logger.cpp
 	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_logger_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT test_logger-test-logger.o -MD -MP -MF $(DEPDIR)/test_logger-test-logger.Tpo -c -o test_logger-test-logger.o `test -f 'test-logger.cpp' || echo '$(srcdir)/'`test-logger.cpp

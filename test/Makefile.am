@@ -1,6 +1,6 @@
 bin_PROGRAMS = test-linked-hash-map test-thread test-thread-pool test-logger
 
-test_linked_hash_map_SOURCES = test-linked-hash-map.cpp ../src/utils/linked-hash-map.cpp
+test_linked_hash_map_SOURCES = test-linked-hash-map.cpp
 
 test_linked_hash_map_CPPFLAGS = -I../src/utils
 

@@ -100,8 +100,7 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__dirstamp = $(am__leading_dot)dirstamp
-am_raft_consensus_OBJECTS = raft/raft.$(OBJEXT) \
-	utils/linked-hash-map.$(OBJEXT)
+am_raft_consensus_OBJECTS = raft/raft.$(OBJEXT)
 raft_consensus_OBJECTS = $(am_raft_consensus_OBJECTS)
 raft_consensus_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_$(V))
@@ -259,8 +258,7 @@ top_builddir = ..
 top_srcdir = ..
 AM_CPPFLAGS = -I..
 raft_consensus_SOURCES = \
-						raft/raft.cpp\
-						utils/linked-hash-map.cpp
+						raft/raft.cpp
 
 all: all-am
 
@@ -345,14 +343,6 @@ raft/$(DEPDIR)/$(am__dirstamp):
 	@: > raft/$(DEPDIR)/$(am__dirstamp)
 raft/raft.$(OBJEXT): raft/$(am__dirstamp) \
 	raft/$(DEPDIR)/$(am__dirstamp)
-utils/$(am__dirstamp):
-	@$(MKDIR_P) utils
-	@: > utils/$(am__dirstamp)
-utils/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) utils/$(DEPDIR)
-	@: > utils/$(DEPDIR)/$(am__dirstamp)
-utils/linked-hash-map.$(OBJEXT): utils/$(am__dirstamp) \
-	utils/$(DEPDIR)/$(am__dirstamp)
 
 raft-consensus$(EXEEXT): $(raft_consensus_OBJECTS) $(raft_consensus_DEPENDENCIES) $(EXTRA_raft_consensus_DEPENDENCIES) 
 	@rm -f raft-consensus$(EXEEXT)
@@ -361,13 +351,11 @@ raft-consensus$(EXEEXT): $(raft_consensus_OBJECTS) $(raft_consensus_DEPENDENCIES
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 	-rm -f raft/*.$(OBJEXT)
-	-rm -f utils/*.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
 
 include raft/$(DEPDIR)/raft.Po
-include utils/$(DEPDIR)/linked-hash-map.Po
 
 .cpp.o:
 	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -502,8 +490,6 @@ distclean-generic:
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
 	-rm -f raft/$(DEPDIR)/$(am__dirstamp)
 	-rm -f raft/$(am__dirstamp)
-	-rm -f utils/$(DEPDIR)/$(am__dirstamp)
-	-rm -f utils/$(am__dirstamp)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -513,7 +499,7 @@ clean: clean-am
 clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
 
 distclean: distclean-am
-	-rm -rf raft/$(DEPDIR) utils/$(DEPDIR)
+	-rm -rf raft/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -559,7 +545,7 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -rf raft/$(DEPDIR) utils/$(DEPDIR)
+	-rm -rf raft/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
