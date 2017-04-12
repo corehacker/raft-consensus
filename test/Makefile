@@ -87,7 +87,8 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 bin_PROGRAMS = test-linked-hash-map$(EXEEXT) test-thread$(EXEEXT) \
-	test-thread-pool$(EXEEXT) test-logger$(EXEEXT)
+	test-thread-pool$(EXEEXT) test-logger$(EXEEXT) \
+	test-libevent$(EXEEXT)
 subdir = test
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -100,6 +101,13 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
+am__dirstamp = $(am__leading_dot)dirstamp
+am_test_libevent_OBJECTS = test_libevent-test-libevent.$(OBJEXT) \
+	../src/utils/test_libevent-thread-job.$(OBJEXT) \
+	../src/utils/test_libevent-thread.$(OBJEXT) \
+	../src/utils/test_libevent-thread-pool.$(OBJEXT)
+test_libevent_OBJECTS = $(am_test_libevent_OBJECTS)
+test_libevent_LDADD = $(LDADD)
 am_test_linked_hash_map_OBJECTS =  \
 	test_linked_hash_map-test-linked-hash-map.$(OBJEXT)
 test_linked_hash_map_OBJECTS = $(am_test_linked_hash_map_OBJECTS)
@@ -107,7 +115,6 @@ test_linked_hash_map_LDADD = $(LDADD)
 am_test_logger_OBJECTS = test_logger-test-logger.$(OBJEXT)
 test_logger_OBJECTS = $(am_test_logger_OBJECTS)
 test_logger_LDADD = $(LDADD)
-am__dirstamp = $(am__leading_dot)dirstamp
 am_test_thread_OBJECTS = test_thread-test-thread.$(OBJEXT) \
 	../src/utils/test_thread-thread-job.$(OBJEXT) \
 	../src/utils/test_thread-thread.$(OBJEXT)
@@ -157,9 +164,11 @@ AM_V_CXXLD = $(am__v_CXXLD_$(V))
 am__v_CXXLD_ = $(am__v_CXXLD_$(AM_DEFAULT_VERBOSITY))
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
-SOURCES = $(test_linked_hash_map_SOURCES) $(test_logger_SOURCES) \
-	$(test_thread_SOURCES) $(test_thread_pool_SOURCES)
-DIST_SOURCES = $(test_linked_hash_map_SOURCES) $(test_logger_SOURCES) \
+SOURCES = $(test_libevent_SOURCES) $(test_linked_hash_map_SOURCES) \
+	$(test_logger_SOURCES) $(test_thread_SOURCES) \
+	$(test_thread_pool_SOURCES)
+DIST_SOURCES = $(test_libevent_SOURCES) \
+	$(test_linked_hash_map_SOURCES) $(test_logger_SOURCES) \
 	$(test_thread_SOURCES) $(test_thread_pool_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
@@ -221,7 +230,7 @@ INSTALL_SCRIPT = ${INSTALL}
 INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 LDFLAGS = 
 LIBOBJS = 
-LIBS = -lpthread -lrt -lm 
+LIBS = -lpthread -lrt -lm -levent 
 LTLIBOBJS = 
 MAKEINFO = ${SHELL} /home/corehacker/workspace/git/raft-consensus/build-aux/missing makeinfo
 MKDIR_P = /bin/mkdir -p
@@ -293,6 +302,8 @@ test_thread_pool_LDFLAGS =
 test_thread_pool_SOURCES = test-thread-pool.cpp ../src/utils/thread-job.cpp ../src/utils/thread.cpp ../src/utils/thread-pool.cpp
 test_logger_SOURCES = test-logger.cpp
 test_logger_CPPFLAGS = -I../src/utils
+test_libevent_SOURCES = test-libevent.cpp ../src/utils/thread-job.cpp ../src/utils/thread.cpp ../src/utils/thread-pool.cpp
+test_libevent_CPPFLAGS = -I../src/utils
 ACLOCAL_AMFLAGS = -I m4
 all: all-am
 
@@ -369,6 +380,25 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+../src/utils/$(am__dirstamp):
+	@$(MKDIR_P) ../src/utils
+	@: > ../src/utils/$(am__dirstamp)
+../src/utils/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) ../src/utils/$(DEPDIR)
+	@: > ../src/utils/$(DEPDIR)/$(am__dirstamp)
+../src/utils/test_libevent-thread-job.$(OBJEXT):  \
+	../src/utils/$(am__dirstamp) \
+	../src/utils/$(DEPDIR)/$(am__dirstamp)
+../src/utils/test_libevent-thread.$(OBJEXT):  \
+	../src/utils/$(am__dirstamp) \
+	../src/utils/$(DEPDIR)/$(am__dirstamp)
+../src/utils/test_libevent-thread-pool.$(OBJEXT):  \
+	../src/utils/$(am__dirstamp) \
+	../src/utils/$(DEPDIR)/$(am__dirstamp)
+
+test-libevent$(EXEEXT): $(test_libevent_OBJECTS) $(test_libevent_DEPENDENCIES) $(EXTRA_test_libevent_DEPENDENCIES) 
+	@rm -f test-libevent$(EXEEXT)
+	$(AM_V_CXXLD)$(CXXLINK) $(test_libevent_OBJECTS) $(test_libevent_LDADD) $(LIBS)
 
 test-linked-hash-map$(EXEEXT): $(test_linked_hash_map_OBJECTS) $(test_linked_hash_map_DEPENDENCIES) $(EXTRA_test_linked_hash_map_DEPENDENCIES) 
 	@rm -f test-linked-hash-map$(EXEEXT)
@@ -377,12 +407,6 @@ test-linked-hash-map$(EXEEXT): $(test_linked_hash_map_OBJECTS) $(test_linked_has
 test-logger$(EXEEXT): $(test_logger_OBJECTS) $(test_logger_DEPENDENCIES) $(EXTRA_test_logger_DEPENDENCIES) 
 	@rm -f test-logger$(EXEEXT)
 	$(AM_V_CXXLD)$(CXXLINK) $(test_logger_OBJECTS) $(test_logger_LDADD) $(LIBS)
-../src/utils/$(am__dirstamp):
-	@$(MKDIR_P) ../src/utils
-	@: > ../src/utils/$(am__dirstamp)
-../src/utils/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) ../src/utils/$(DEPDIR)
-	@: > ../src/utils/$(DEPDIR)/$(am__dirstamp)
 ../src/utils/test_thread-thread-job.$(OBJEXT):  \
 	../src/utils/$(am__dirstamp) \
 	../src/utils/$(DEPDIR)/$(am__dirstamp)
@@ -414,11 +438,15 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+include ../src/utils/$(DEPDIR)/test_libevent-thread-job.Po
+include ../src/utils/$(DEPDIR)/test_libevent-thread-pool.Po
+include ../src/utils/$(DEPDIR)/test_libevent-thread.Po
 include ../src/utils/$(DEPDIR)/test_thread-thread-job.Po
 include ../src/utils/$(DEPDIR)/test_thread-thread.Po
 include ../src/utils/$(DEPDIR)/test_thread_pool-thread-job.Po
 include ../src/utils/$(DEPDIR)/test_thread_pool-thread-pool.Po
 include ../src/utils/$(DEPDIR)/test_thread_pool-thread.Po
+include ./$(DEPDIR)/test_libevent-test-libevent.Po
 include ./$(DEPDIR)/test_linked_hash_map-test-linked-hash-map.Po
 include ./$(DEPDIR)/test_logger-test-logger.Po
 include ./$(DEPDIR)/test_thread-test-thread.Po
@@ -439,6 +467,62 @@ include ./$(DEPDIR)/test_thread_pool-test-thread-pool.Po
 #	$(AM_V_CXX)source='$<' object='$@' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(AM_V_CXX_no)$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+test_libevent-test-libevent.o: test-libevent.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_libevent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT test_libevent-test-libevent.o -MD -MP -MF $(DEPDIR)/test_libevent-test-libevent.Tpo -c -o test_libevent-test-libevent.o `test -f 'test-libevent.cpp' || echo '$(srcdir)/'`test-libevent.cpp
+	$(AM_V_at)$(am__mv) $(DEPDIR)/test_libevent-test-libevent.Tpo $(DEPDIR)/test_libevent-test-libevent.Po
+#	$(AM_V_CXX)source='test-libevent.cpp' object='test_libevent-test-libevent.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_libevent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o test_libevent-test-libevent.o `test -f 'test-libevent.cpp' || echo '$(srcdir)/'`test-libevent.cpp
+
+test_libevent-test-libevent.obj: test-libevent.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_libevent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT test_libevent-test-libevent.obj -MD -MP -MF $(DEPDIR)/test_libevent-test-libevent.Tpo -c -o test_libevent-test-libevent.obj `if test -f 'test-libevent.cpp'; then $(CYGPATH_W) 'test-libevent.cpp'; else $(CYGPATH_W) '$(srcdir)/test-libevent.cpp'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/test_libevent-test-libevent.Tpo $(DEPDIR)/test_libevent-test-libevent.Po
+#	$(AM_V_CXX)source='test-libevent.cpp' object='test_libevent-test-libevent.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_libevent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o test_libevent-test-libevent.obj `if test -f 'test-libevent.cpp'; then $(CYGPATH_W) 'test-libevent.cpp'; else $(CYGPATH_W) '$(srcdir)/test-libevent.cpp'; fi`
+
+../src/utils/test_libevent-thread-job.o: ../src/utils/thread-job.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_libevent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../src/utils/test_libevent-thread-job.o -MD -MP -MF ../src/utils/$(DEPDIR)/test_libevent-thread-job.Tpo -c -o ../src/utils/test_libevent-thread-job.o `test -f '../src/utils/thread-job.cpp' || echo '$(srcdir)/'`../src/utils/thread-job.cpp
+	$(AM_V_at)$(am__mv) ../src/utils/$(DEPDIR)/test_libevent-thread-job.Tpo ../src/utils/$(DEPDIR)/test_libevent-thread-job.Po
+#	$(AM_V_CXX)source='../src/utils/thread-job.cpp' object='../src/utils/test_libevent-thread-job.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_libevent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/utils/test_libevent-thread-job.o `test -f '../src/utils/thread-job.cpp' || echo '$(srcdir)/'`../src/utils/thread-job.cpp
+
+../src/utils/test_libevent-thread-job.obj: ../src/utils/thread-job.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_libevent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../src/utils/test_libevent-thread-job.obj -MD -MP -MF ../src/utils/$(DEPDIR)/test_libevent-thread-job.Tpo -c -o ../src/utils/test_libevent-thread-job.obj `if test -f '../src/utils/thread-job.cpp'; then $(CYGPATH_W) '../src/utils/thread-job.cpp'; else $(CYGPATH_W) '$(srcdir)/../src/utils/thread-job.cpp'; fi`
+	$(AM_V_at)$(am__mv) ../src/utils/$(DEPDIR)/test_libevent-thread-job.Tpo ../src/utils/$(DEPDIR)/test_libevent-thread-job.Po
+#	$(AM_V_CXX)source='../src/utils/thread-job.cpp' object='../src/utils/test_libevent-thread-job.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_libevent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/utils/test_libevent-thread-job.obj `if test -f '../src/utils/thread-job.cpp'; then $(CYGPATH_W) '../src/utils/thread-job.cpp'; else $(CYGPATH_W) '$(srcdir)/../src/utils/thread-job.cpp'; fi`
+
+../src/utils/test_libevent-thread.o: ../src/utils/thread.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_libevent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../src/utils/test_libevent-thread.o -MD -MP -MF ../src/utils/$(DEPDIR)/test_libevent-thread.Tpo -c -o ../src/utils/test_libevent-thread.o `test -f '../src/utils/thread.cpp' || echo '$(srcdir)/'`../src/utils/thread.cpp
+	$(AM_V_at)$(am__mv) ../src/utils/$(DEPDIR)/test_libevent-thread.Tpo ../src/utils/$(DEPDIR)/test_libevent-thread.Po
+#	$(AM_V_CXX)source='../src/utils/thread.cpp' object='../src/utils/test_libevent-thread.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_libevent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/utils/test_libevent-thread.o `test -f '../src/utils/thread.cpp' || echo '$(srcdir)/'`../src/utils/thread.cpp
+
+../src/utils/test_libevent-thread.obj: ../src/utils/thread.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_libevent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../src/utils/test_libevent-thread.obj -MD -MP -MF ../src/utils/$(DEPDIR)/test_libevent-thread.Tpo -c -o ../src/utils/test_libevent-thread.obj `if test -f '../src/utils/thread.cpp'; then $(CYGPATH_W) '../src/utils/thread.cpp'; else $(CYGPATH_W) '$(srcdir)/../src/utils/thread.cpp'; fi`
+	$(AM_V_at)$(am__mv) ../src/utils/$(DEPDIR)/test_libevent-thread.Tpo ../src/utils/$(DEPDIR)/test_libevent-thread.Po
+#	$(AM_V_CXX)source='../src/utils/thread.cpp' object='../src/utils/test_libevent-thread.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_libevent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/utils/test_libevent-thread.obj `if test -f '../src/utils/thread.cpp'; then $(CYGPATH_W) '../src/utils/thread.cpp'; else $(CYGPATH_W) '$(srcdir)/../src/utils/thread.cpp'; fi`
+
+../src/utils/test_libevent-thread-pool.o: ../src/utils/thread-pool.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_libevent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../src/utils/test_libevent-thread-pool.o -MD -MP -MF ../src/utils/$(DEPDIR)/test_libevent-thread-pool.Tpo -c -o ../src/utils/test_libevent-thread-pool.o `test -f '../src/utils/thread-pool.cpp' || echo '$(srcdir)/'`../src/utils/thread-pool.cpp
+	$(AM_V_at)$(am__mv) ../src/utils/$(DEPDIR)/test_libevent-thread-pool.Tpo ../src/utils/$(DEPDIR)/test_libevent-thread-pool.Po
+#	$(AM_V_CXX)source='../src/utils/thread-pool.cpp' object='../src/utils/test_libevent-thread-pool.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_libevent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/utils/test_libevent-thread-pool.o `test -f '../src/utils/thread-pool.cpp' || echo '$(srcdir)/'`../src/utils/thread-pool.cpp
+
+../src/utils/test_libevent-thread-pool.obj: ../src/utils/thread-pool.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_libevent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../src/utils/test_libevent-thread-pool.obj -MD -MP -MF ../src/utils/$(DEPDIR)/test_libevent-thread-pool.Tpo -c -o ../src/utils/test_libevent-thread-pool.obj `if test -f '../src/utils/thread-pool.cpp'; then $(CYGPATH_W) '../src/utils/thread-pool.cpp'; else $(CYGPATH_W) '$(srcdir)/../src/utils/thread-pool.cpp'; fi`
+	$(AM_V_at)$(am__mv) ../src/utils/$(DEPDIR)/test_libevent-thread-pool.Tpo ../src/utils/$(DEPDIR)/test_libevent-thread-pool.Po
+#	$(AM_V_CXX)source='../src/utils/thread-pool.cpp' object='../src/utils/test_libevent-thread-pool.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_libevent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/utils/test_libevent-thread-pool.obj `if test -f '../src/utils/thread-pool.cpp'; then $(CYGPATH_W) '../src/utils/thread-pool.cpp'; else $(CYGPATH_W) '$(srcdir)/../src/utils/thread-pool.cpp'; fi`
 
 test_linked_hash_map-test-linked-hash-map.o: test-linked-hash-map.cpp
 	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_linked_hash_map_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT test_linked_hash_map-test-linked-hash-map.o -MD -MP -MF $(DEPDIR)/test_linked_hash_map-test-linked-hash-map.Tpo -c -o test_linked_hash_map-test-linked-hash-map.o `test -f 'test-linked-hash-map.cpp' || echo '$(srcdir)/'`test-linked-hash-map.cpp

@@ -1,4 +1,4 @@
-bin_PROGRAMS = test-linked-hash-map test-thread test-thread-pool test-logger
+bin_PROGRAMS = test-linked-hash-map test-thread test-thread-pool test-logger test-libevent
 
 test_linked_hash_map_SOURCES = test-linked-hash-map.cpp
 
@@ -19,5 +19,9 @@ test_thread_pool_SOURCES = test-thread-pool.cpp ../src/utils/thread-job.cpp ../s
 test_logger_SOURCES = test-logger.cpp
 
 test_logger_CPPFLAGS = -I../src/utils
+
+test_libevent_SOURCES = test-libevent.cpp ../src/utils/thread-job.cpp ../src/utils/thread.cpp ../src/utils/thread-pool.cpp
+
+test_libevent_CPPFLAGS = -I../src/utils
 
 ACLOCAL_AMFLAGS = -I m4

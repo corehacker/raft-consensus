@@ -14,7 +14,7 @@ AC_LANG([C])
 # AC_CHECK_HEADER_STDBOOL
 
 CXXFLAGS="$CXXFLAGS -Wall -std=c++11"
-LIBS="-lpthread -lrt -lm $LIBS"
+LIBS="-lpthread -lrt -lm -levent $LIBS"
 
 ##########################################################################
 # check for ch-pal library

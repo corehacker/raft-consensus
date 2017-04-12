@@ -4,3 +4,4 @@
 /test-logger.cpp
 /test-thread
 /test-thread-pool
+/test-libevent
