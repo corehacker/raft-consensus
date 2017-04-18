@@ -71,7 +71,16 @@ Thread::threadFunc (void *this_)
 void
 Thread::run ()
 {
-   LOG << "Entering thread func 1" << std::endl;
+   if (true == mBase)
+   {
+      mEventBase = event_base_new();
+      LOG << "Creating event base: " << mEventBase << std::endl;
+   }
+   else
+   {
+      mEventBase = NULL;
+      LOG << "Not creating event base: " << mEventBase << std::endl;
+   }
    while (true) {
       ThreadJob job = mGetJob (mGetJobThis);
       runJob (job);
@@ -81,8 +90,7 @@ Thread::run ()
 void
 Thread::runJob (ThreadJob &job)
 {
-   LOG << "Running new job" << std::endl;
-   job.routine (job.arg);
+   job.routine (job.arg, mEventBase);
 }
 
 Thread::Thread (ThreadGetJob getJob, void *this_)
@@ -90,6 +98,17 @@ Thread::Thread (ThreadGetJob getJob, void *this_)
    LOG << "Creating thread" << std::endl;
    mGetJob = getJob;
    mGetJobThis = this_;
+   mBase = false;
+   mEventBase = NULL;
+   pthread_create (&mThread, NULL, Thread::threadFunc, this);
+}
+
+Thread::Thread (ThreadGetJob getJob, void *this_, bool base)
+{
+   mGetJob = getJob;
+   mGetJobThis = this_;
+   mBase = base;
+   mEventBase = NULL;
    pthread_create (&mThread, NULL, Thread::threadFunc, this);
 }
 

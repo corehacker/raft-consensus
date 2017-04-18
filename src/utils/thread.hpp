@@ -41,6 +41,7 @@
  ******************************************************************************/
 
 #include <pthread.h>
+#include <event2/event.h>
 
 #include <deque>
 #include <mutex>
@@ -61,12 +62,15 @@
 class Thread {
    public:
       Thread (ThreadGetJob getJob, void *this_);
+      Thread (ThreadGetJob getJob, void *this_, bool base = false);
       ~Thread ();
       void addJob (ThreadJob &job);
    private:
-      pthread_t mThread;
-      ThreadGetJob mGetJob;
-      void *mGetJobThis;
+      pthread_t         mThread;
+      ThreadGetJob      mGetJob;
+      void              *mGetJobThis;
+      struct event_base *mEventBase;
+      bool              mBase;
 
       static void *threadFunc (void *this_);
       void run ();
