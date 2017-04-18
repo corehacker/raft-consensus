@@ -80,6 +80,12 @@ static void event_log_cbk(int severity, const char *msg);
 
 static void event_listen_cbk(evutil_socket_t fd, short events, void *arg);
 
+static void bufferevent_read_cbk (struct bufferevent *bev, void *ctx);
+
+static void bufferevent_write_cbk (struct bufferevent *bev, void *ctx);
+
+static void bufferevent_event_cbk (struct bufferevent *bev, short what, void *ctx);
+
 /****************************** LOCAL FUNCTIONS *******************************/
 using namespace std;
 
@@ -87,7 +93,6 @@ static Logger &log = Logger::getInstance();
 
 typedef struct _listen_ctxt {
    int listen_fd;
-   struct event_base *base;
    struct event *listen_event;
    ThreadPool *listenThread;
    ThreadPool *workerPool;
@@ -101,25 +106,40 @@ typedef struct _client_ctxt {
    struct sockaddr_in *px_sock_addr_in;
 } client_ctxt;
 
-void * worker_thread_routine (void *arg)
+void * worker_thread_routine (void *arg, struct event_base *base)
 {
+   if (NULL == arg || NULL == base) return NULL;
+
    client_ctxt *client = (client_ctxt *) arg;
-   LOG << "Running Worker Thread Routine" << std::endl;
+   LOG << "Running Worker Thread Job, Base: " << base << std::endl;
+
+   client->client_bev = bufferevent_socket_new (base,
+         client->client_fd, 0);
+
+   bufferevent_setcb (client->client_bev, bufferevent_read_cbk,
+         bufferevent_write_cbk, bufferevent_event_cbk, client);
 
    bufferevent_enable (client->client_bev, EV_READ | EV_WRITE);
+
+   event_base_dispatch(base);
 
    return NULL;
 }
 
-void * listen_thread_routine (void *arg)
+void * listen_thread_routine (void *arg, struct event_base *base)
 {
+   if (NULL == arg || NULL == base) return NULL;
+
    listen_ctxt *listenCtxt = (listen_ctxt *) arg;
-   LOG << "Running Listen Thread Routine" << std::endl;
+   LOG << "Running Listen Thread Job, Base: " << base << std::endl;
+
+   listenCtxt->listen_event = event_new(base, listenCtxt->listen_fd, EV_READ,
+                                        event_listen_cbk, listenCtxt);
 
    struct timeval to = {0xFFFFFFFF, 0xFFFFFFFF};
    event_add(listenCtxt->listen_event, &to);
 
-   event_base_dispatch(listenCtxt->base);
+   event_base_dispatch(base);
 
    return NULL;
 }
@@ -179,11 +199,6 @@ static void event_listen_cbk(evutil_socket_t fd, short events, void *arg) {
 
       evutil_make_socket_nonblocking(client->client_fd);
 
-      client->client_bev = bufferevent_socket_new (listenCtxt->base,
-            client->client_fd, 0);
-      bufferevent_setcb (client->client_bev, bufferevent_read_cbk,
-            bufferevent_write_cbk, bufferevent_event_cbk, client);
-
       ThreadJob job = ThreadJob (worker_thread_routine, client);
       listenCtxt->workerPool->addJob(job);
    }
@@ -199,10 +214,9 @@ int main () {
    struct event *listen_event = NULL;
    listen_ctxt *listenCtxt = NULL;
 
-   ThreadPool *listenThread = new ThreadPool (1);
-   ThreadPool *workerPool = new ThreadPool ();
+   ThreadPool *listenThread = new ThreadPool (1, true);
+   ThreadPool *workerPool = new ThreadPool (8, true);
 
-   struct event_base *base = event_base_new();
    event_set_log_callback(event_log_cbk);
 
    listen_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -229,9 +243,7 @@ int main () {
    listenCtxt = (listen_ctxt *) malloc (sizeof (listen_ctxt));
    memset (listenCtxt, 0x00, sizeof (*listenCtxt));
 
-   listen_event = event_new(base, listen_fd, EV_READ, event_listen_cbk, listenCtxt);
    listenCtxt->listen_fd = listen_fd;
-   listenCtxt->base = base;
    listenCtxt->listen_event = listen_event;
    listenCtxt->listenThread = listenThread;
    listenCtxt->workerPool = workerPool;

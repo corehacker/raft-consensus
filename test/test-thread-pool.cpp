@@ -63,7 +63,7 @@ using namespace std;
 static Logger &log = Logger::getInstance();
 
 void *
-routine (void *arg)
+routine (void *arg, struct event_base *base)
 {
    LOG << std::this_thread::get_id () << " Running Job Routine" << std::endl;
 
@@ -73,7 +73,7 @@ routine (void *arg)
 int
 main ()
 {
-   ThreadPool *pool = new ThreadPool ();
+   ThreadPool *pool = new ThreadPool (8, false);
    uint32_t uiCount = 0;
 
    std::chrono::milliseconds ms(1000);
