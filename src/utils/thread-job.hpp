@@ -52,7 +52,7 @@
 /******************************** ENUMERATIONS ********************************/
 
 /*********************** CLASS/STRUCTURE/UNION DATA TYPES *********************/
-typedef void * (*ThreadJobRoutine) (void *arg);
+typedef void * (*ThreadJobRoutine) (void *arg, struct event_base *base);
 
 class ThreadJob {
    public:

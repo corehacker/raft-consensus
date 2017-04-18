@@ -68,6 +68,8 @@ class ThreadPool
 {
    public:
       ThreadPool (uint32_t uiCount = THREAD_POOL_DEFAULT_COUNT);
+      ThreadPool (uint32_t uiCount = THREAD_POOL_DEFAULT_COUNT,
+                  bool base = false);
       ~ThreadPool ();
       void addJob (ThreadJob &job);
    private:
@@ -76,11 +78,11 @@ class ThreadPool
       std::condition_variable mCondition;
       std::vector<Thread *> mThreads;
       uint32_t uiCount;
+      bool mBase;
 
-      ThreadJob &
-      threadGetNextJob_ ();
-      static ThreadJob &
-      threadGetNextJob (void *this_);
+      ThreadJob &threadGetNextJob_ ();
+      static ThreadJob &threadGetNextJob (void *this_);
+      void createThreads ();
 };
 
 /***************************** FUNCTION PROTOTYPES ****************************/

@@ -64,21 +64,35 @@ static Logger &log = Logger::getInstance();
 
 ThreadPool::ThreadPool (uint32_t uiCount) :
       mJobQueue (),
-         mMutex (),
-         mCondition (),
-         mThreads ()
+      mMutex (),
+      mCondition (),
+      mThreads ()
 {
    this->uiCount = uiCount;
+   mBase = false;
+   createThreads();
+}
 
-   for (uint32_t uiIndex = 0; uiIndex < uiCount; uiIndex++)
-   {
-      mThreads.push_back (new Thread (ThreadPool::threadGetNextJob, this));
-   }
+ThreadPool::ThreadPool (uint32_t uiCount,
+                  bool base)
+{
+   this->uiCount = uiCount;
+   mBase = base;
+   createThreads();
 }
 
 ThreadPool::~ThreadPool ()
 {
 
+}
+
+void ThreadPool::createThreads ()
+{
+   for (uint32_t uiIndex = 0; uiIndex < uiCount; uiIndex++)
+   {
+      mThreads.push_back (new Thread (ThreadPool::threadGetNextJob, this,
+                                      mBase));
+   }
 }
 
 void
@@ -93,7 +107,6 @@ ThreadPool::addJob (ThreadJob &job)
 ThreadJob &
 ThreadPool::threadGetNextJob_ ()
 {
-   LOG << "Entering thread func 1" << std::endl;
    while (true)
    {
       if (!mJobQueue.empty ())
@@ -108,7 +121,7 @@ ThreadPool::threadGetNextJob_ ()
       }
       else
       {
-         LOG << "Waiting for job" << std::endl;
+         // LOG << "Waiting for job" << std::endl;
          std::unique_lock < std::mutex > lk (mMutex);
          mCondition.wait (lk);
       }
