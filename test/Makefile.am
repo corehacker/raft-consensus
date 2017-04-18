@@ -20,7 +20,7 @@ test_logger_SOURCES = test-logger.cpp
 
 test_logger_CPPFLAGS = -I../src/utils
 
-test_libevent_SOURCES = test-libevent.cpp ../src/utils/thread-job.cpp ../src/utils/thread.cpp ../src/utils/thread-pool.cpp
+test_libevent_SOURCES = test-libevent.cpp ../src/utils/thread-job.cpp ../src/utils/thread.cpp ../src/utils/thread-pool.cpp ../src/utils/tcp-listener.cpp
 
 test_libevent_CPPFLAGS = -I../src/utils
 

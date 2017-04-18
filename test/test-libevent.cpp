@@ -65,6 +65,7 @@
 #include <thread>
 #include <chrono>
 #include "thread-pool.hpp"
+#include "tcp-listener.hpp"
 #include "logger.hpp"
 
 /********************************* CONSTANTS **********************************/
@@ -78,28 +79,21 @@
 /************************ STATIC FUNCTION PROTOTYPES **************************/
 static void event_log_cbk(int severity, const char *msg);
 
-static void event_listen_cbk(evutil_socket_t fd, short events, void *arg);
-
 static void bufferevent_read_cbk (struct bufferevent *bev, void *ctx);
 
 static void bufferevent_write_cbk (struct bufferevent *bev, void *ctx);
 
 static void bufferevent_event_cbk (struct bufferevent *bev, short what, void *ctx);
 
+static void onConnection (int client_fd,
+      struct sockaddr_in *px_sock_addr_in, void *this_);
+
 /****************************** LOCAL FUNCTIONS *******************************/
 using namespace std;
 
 static Logger &log = Logger::getInstance();
 
-typedef struct _listen_ctxt {
-   int listen_fd;
-   struct event *listen_event;
-   ThreadPool *listenThread;
-   ThreadPool *workerPool;
-} listen_ctxt;
-
 typedef struct _client_ctxt {
-   listen_ctxt *listenCtxt;
    int client_fd;
    struct event *client_event;
    struct bufferevent *client_bev;
@@ -120,24 +114,6 @@ void * worker_thread_routine (void *arg, struct event_base *base)
          bufferevent_write_cbk, bufferevent_event_cbk, client);
 
    bufferevent_enable (client->client_bev, EV_READ | EV_WRITE);
-
-   event_base_dispatch(base);
-
-   return NULL;
-}
-
-void * listen_thread_routine (void *arg, struct event_base *base)
-{
-   if (NULL == arg || NULL == base) return NULL;
-
-   listen_ctxt *listenCtxt = (listen_ctxt *) arg;
-   LOG << "Running Listen Thread Job, Base: " << base << std::endl;
-
-   listenCtxt->listen_event = event_new(base, listenCtxt->listen_fd, EV_READ,
-                                        event_listen_cbk, listenCtxt);
-
-   struct timeval to = {0xFFFFFFFF, 0xFFFFFFFF};
-   event_add(listenCtxt->listen_event, &to);
 
    event_base_dispatch(base);
 
@@ -178,78 +154,27 @@ static void bufferevent_event_cbk (struct bufferevent *bev, short what, void *ct
 
 }
 
-static void event_listen_cbk(evutil_socket_t fd, short events, void *arg) {
-   listen_ctxt *listenCtxt = (listen_ctxt *) arg;
-   socklen_t ui_sock_addr_len = 0;
-
-   LOG << "New connection!!" << std::endl;
+static void onConnection (int client_fd,
+      struct sockaddr_in *px_sock_addr_in, void *this_)
+{
+   ThreadPool *workerPool = (ThreadPool *) this_;
+   LOG << "New connection" << std::endl;
    client_ctxt *client = (client_ctxt *) malloc (sizeof (client_ctxt));
    memset (client, 0x00, sizeof (*client));
-
-   client->px_sock_addr_in = (struct sockaddr_in *) malloc (
-         sizeof (struct sockaddr_in));
-   ui_sock_addr_len = sizeof (*(client->px_sock_addr_in));
-   memset (client->px_sock_addr_in, 0x00, ui_sock_addr_len);
-
-   client->client_fd = accept (listenCtxt->listen_fd,
-         (struct sockaddr *) client->px_sock_addr_in, &ui_sock_addr_len);
-   client->listenCtxt = listenCtxt;
-   if (client->client_fd > 0) {
-      LOG << "Accepted connection!!" << std::endl;
-
-      evutil_make_socket_nonblocking(client->client_fd);
-
-      ThreadJob job = ThreadJob (worker_thread_routine, client);
-      listenCtxt->workerPool->addJob(job);
-   }
-
-   ThreadJob job = ThreadJob (listen_thread_routine, listenCtxt);
-   listenCtxt->listenThread->addJob(job);
+   client->client_fd = client_fd;
+   client->px_sock_addr_in = px_sock_addr_in;
+   ThreadJob job = ThreadJob (worker_thread_routine, client);
+   workerPool->addJob(job);
 }
 
 int main () {
-   int listen_fd;
-   struct sockaddr_in listen_addr;
-   int reuseaddr_on;
-   struct event *listen_event = NULL;
-   listen_ctxt *listenCtxt = NULL;
-
-   ThreadPool *listenThread = new ThreadPool (1, true);
-   ThreadPool *workerPool = new ThreadPool (8, true);
-
    event_set_log_callback(event_log_cbk);
 
-   listen_fd = socket(AF_INET, SOCK_STREAM, 0);
-   if (listen_fd < 0) {
-      printf("socket failed");
-      exit (-1);
-   }
-   memset(&listen_addr, 0, sizeof(listen_addr));
-   listen_addr.sin_family = AF_INET;
-   listen_addr.sin_addr.s_addr = INADDR_ANY;
-   listen_addr.sin_port = htons(8888);
-   if (bind(listen_fd, (struct sockaddr *)&listen_addr,
-      sizeof(listen_addr)) < 0)
-      err(1, "bind failed");
-   if (listen(listen_fd, 5) < 0)
-      err(1, "listen failed");
-   reuseaddr_on = 1;
-   setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &reuseaddr_on,
-       sizeof(reuseaddr_on));
+   ThreadPool *workerPool = new ThreadPool (8, true);
 
-   evutil_make_socket_nonblocking(listen_fd);
-
-
-   listenCtxt = (listen_ctxt *) malloc (sizeof (listen_ctxt));
-   memset (listenCtxt, 0x00, sizeof (*listenCtxt));
-
-   listenCtxt->listen_fd = listen_fd;
-   listenCtxt->listen_event = listen_event;
-   listenCtxt->listenThread = listenThread;
-   listenCtxt->workerPool = workerPool;
-
-   ThreadJob job = ThreadJob (listen_thread_routine, listenCtxt);
-   listenThread->addJob(job);
+   TcpListener *tcpListener = new TcpListener (INADDR_ANY, 8888);
+   tcpListener->onNewConnection(onConnection, workerPool);
+   tcpListener->init();
 
    std::chrono::milliseconds ms(1000);
    while (true) {
@@ -258,10 +183,4 @@ int main () {
 
    return 0;
 }
-
-
-
-
-
-
 
