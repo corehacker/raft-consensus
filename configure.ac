@@ -13,7 +13,7 @@ AC_CHECK_TOOLS(CXX, [$CCC c++ g++ gcc CC cxx cc++ cl], gcc)
 AC_LANG([C])
 # AC_CHECK_HEADER_STDBOOL
 
-CXXFLAGS="$CXXFLAGS -Wall -std=c++11"
+CXXFLAGS="$CXXFLAGS -Wall -std=c++0x"
 LIBS="-lpthread -lrt -lm -levent $LIBS"
 
 ##########################################################################
