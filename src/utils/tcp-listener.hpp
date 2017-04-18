@@ -87,7 +87,7 @@ class TcpListener {
 public:
    TcpListener (in_addr_t ip, in_port_t port);
    ~TcpListener ();
-   int init ();
+   int start ();
    void onNewConnection (OnConnection onConnection, void *this_);
 private:
    static void * threadCbk (void *arg, struct event_base *base);

@@ -71,6 +71,8 @@
 /********************************* CONSTANTS **********************************/
 
 /*********************************** MACROS ***********************************/
+#define _200_OK ("HTTP/1.1 200 OK\r\nContent-Length: 0\r\n\r\n")
+#define _500_INTERNAL_SERVER_ERROR ("HTTP/1.1 500 Internal Server Error\r\nContent-Length: 0\r\n\r\n")
 
 /******************************** ENUMERATIONS ********************************/
 
@@ -134,16 +136,22 @@ static void bufferevent_read_cbk (struct bufferevent *bev, void *ctx) {
    uint8_t *data = (uint8_t *) malloc (readLength);
 
    char *response;
-   if ((read = evbuffer_remove(buf, (void *) data, readLength)) != readLength) {
-      response = "HTTP/1.1 500 Internal Server Error\r\nContent-Length: 0\r\n\r\n";
+   if ((read = evbuffer_remove(buf, (void *) data, readLength)) != (int) readLength) {
+      response = (char *) malloc (sizeof (_500_INTERNAL_SERVER_ERROR));
+      strncpy (response, _500_INTERNAL_SERVER_ERROR,
+               sizeof (_500_INTERNAL_SERVER_ERROR));
    }
    else {
       LOG << "Read " << readLength << " bytes from socket." << std::endl;
       LOG << std::endl << data << std::endl;
-      response = "HTTP/1.1 200 OK\r\nContent-Length: 0\r\n\r\n";
+
+      response = (char *) malloc (sizeof (_200_OK));
+      strncpy (response, _200_OK, sizeof (_200_OK));
    }
    uint32_t length = strlen (response) + 1;
    bufferevent_write (bev, (const void *) response, length);
+   free (response);
+   response = NULL;
 }
 
 static void bufferevent_write_cbk (struct bufferevent *bev, void *ctx) {
@@ -174,7 +182,7 @@ int main () {
 
    TcpListener *tcpListener = new TcpListener (INADDR_ANY, 8888);
    tcpListener->onNewConnection(onConnection, workerPool);
-   tcpListener->init();
+   tcpListener->start();
 
    std::chrono::milliseconds ms(1000);
    while (true) {

@@ -115,7 +115,7 @@ void TcpListener::eventDispatch (struct event_base *base)
    event_base_dispatch(base);
 }
 
-int TcpListener::init () {
+int TcpListener::start () {
    struct sockaddr_in listen_addr;
    int reuseaddr_on;
 
