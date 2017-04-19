@@ -73,7 +73,9 @@ class Logger
    private:
       std::ostream &m_file;
       std::mutex mMutex;
+      std::mutex mStartMutex;
       std::condition_variable mCondition;
+      std::condition_variable mStartCondition;
       pthread_t mThread;
       std::deque<std::ostringstream *> mLogQueue;
       std::unordered_map<std::thread::id, std::ostringstream *> mLogMap;
@@ -85,6 +87,7 @@ class Logger
       }
 
       void threadFunc_ () {
+         mStartCondition.notify_one ();
          while (true)
          {
             if (!mLogQueue.empty ())
@@ -94,7 +97,7 @@ class Logger
                mLogQueue.pop_front ();
                mMutex.unlock ();
                std::cout << log->str ();
-               delete log;
+               // delete log;
                fflush (stdout);
             }
             else
@@ -108,15 +111,22 @@ class Logger
    public:
       static Logger& getInstance()
       {
-          static Logger instance; // Guaranteed to be destroyed.
+         printf ("***getInstance\n");
+
+         static Logger instance; // Guaranteed to be destroyed.
                                 // Instantiated on first use.
-          return instance;
+         return instance;
       }
 
       Logger (std::ostream &o = std::cout) :
             m_file (o)
       {
+         printf ("***Creating thread\n");
          pthread_create (&mThread, NULL, Logger::threadFunc, this);
+         std::unique_lock < std::mutex > lk (mStartMutex);
+         printf ("***Waiting for thread creation\n");
+         mStartCondition.wait (lk);
+         printf ("***Thread creation successful\n");
       }
 
       template<typename T>

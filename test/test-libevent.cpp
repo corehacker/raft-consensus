@@ -41,6 +41,13 @@
  ******************************************************************************/
 
 /********************************** INCLUDES **********************************/
+#include <stdio.h>
+#include <execinfo.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -66,6 +73,7 @@
 #include <chrono>
 #include "thread-pool.hpp"
 #include "tcp-listener.hpp"
+#include "tcp-server.hpp"
 #include "logger.hpp"
 
 /********************************* CONSTANTS **********************************/
@@ -81,108 +89,59 @@
 /************************ STATIC FUNCTION PROTOTYPES **************************/
 static void event_log_cbk(int severity, const char *msg);
 
-static void bufferevent_read_cbk (struct bufferevent *bev, void *ctx);
-
-static void bufferevent_write_cbk (struct bufferevent *bev, void *ctx);
-
-static void bufferevent_event_cbk (struct bufferevent *bev, short what, void *ctx);
-
-static void onConnection (int client_fd,
-      struct sockaddr_in *px_sock_addr_in, void *this_);
+static void onMessage (client_ctxt *client, uint8_t *message, uint32_t length, void *this_);
 
 /****************************** LOCAL FUNCTIONS *******************************/
 using namespace std;
 
 static Logger &log = Logger::getInstance();
 
-typedef struct _client_ctxt {
-   int client_fd;
-   struct event *client_event;
-   struct bufferevent *client_bev;
-   struct sockaddr_in *px_sock_addr_in;
-} client_ctxt;
-
-void * worker_thread_routine (void *arg, struct event_base *base)
-{
-   if (NULL == arg || NULL == base) return NULL;
-
-   client_ctxt *client = (client_ctxt *) arg;
-   LOG << "Running Worker Thread Job, Base: " << base << std::endl;
-
-   client->client_bev = bufferevent_socket_new (base,
-         client->client_fd, 0);
-
-   bufferevent_setcb (client->client_bev, bufferevent_read_cbk,
-         bufferevent_write_cbk, bufferevent_event_cbk, client);
-
-   bufferevent_enable (client->client_bev, EV_READ | EV_WRITE);
-
-   event_base_dispatch(base);
-
-   return NULL;
-}
-
 static void event_log_cbk(int severity, const char *msg) {
 
 }
 
-static void bufferevent_read_cbk (struct bufferevent *bev, void *ctx) {
-   LOG << "Data on socket!!" << std::endl;
-   struct evbuffer *buf = evbuffer_new();
-   bufferevent_read_buffer(bev, buf);
+void handler(int sig) {
+   signal(SIGSEGV, SIG_DFL);
+   signal(SIGABRT, SIG_DFL);
 
-   size_t readLength = evbuffer_get_length (buf);
-   int read = -1;
-   uint8_t *data = (uint8_t *) malloc (readLength);
+  void *array[10];
+  size_t size;
 
-   char *response;
-   if ((read = evbuffer_remove(buf, (void *) data, readLength)) != (int) readLength) {
-      response = (char *) malloc (sizeof (_500_INTERNAL_SERVER_ERROR));
-      strncpy (response, _500_INTERNAL_SERVER_ERROR,
-               sizeof (_500_INTERNAL_SERVER_ERROR));
-   }
-   else {
-      LOG << "Read " << readLength << " bytes from socket." << std::endl;
-      LOG << std::endl << data << std::endl;
+  // get void*'s for all entries on the stack
+  size = backtrace(array, 10);
 
-      response = (char *) malloc (sizeof (_200_OK));
-      strncpy (response, _200_OK, sizeof (_200_OK));
-   }
-   uint32_t length = strlen (response) + 1;
-   bufferevent_write (bev, (const void *) response, length);
-   free (response);
-   response = NULL;
+  // print out all the frames to stderr
+  fprintf(stderr, "Error: signal %d:\n", sig);
+  backtrace_symbols_fd(array, size, STDERR_FILENO);
+  exit(1);
 }
 
-static void bufferevent_write_cbk (struct bufferevent *bev, void *ctx) {
 
-}
-
-static void bufferevent_event_cbk (struct bufferevent *bev, short what, void *ctx) {
-
-}
-
-static void onConnection (int client_fd,
-      struct sockaddr_in *px_sock_addr_in, void *this_)
+static void onMessage (client_ctxt *client, uint8_t *message, uint32_t length, void *this_)
 {
-   ThreadPool *workerPool = (ThreadPool *) this_;
-   LOG << "New connection" << std::endl;
-   client_ctxt *client = (client_ctxt *) malloc (sizeof (client_ctxt));
-   memset (client, 0x00, sizeof (*client));
-   client->client_fd = client_fd;
-   client->px_sock_addr_in = px_sock_addr_in;
-   ThreadJob job = ThreadJob (worker_thread_routine, client);
-   workerPool->addJob(job);
+   char *response;
+   uint32_t size;
+
+   LOG << "New Message" << std::endl;
+   LOG << "Read " << length << " bytes from socket." << std::endl;
+   LOG << std::endl << message << std::endl;
+
+   response = (char *) malloc (sizeof (_200_OK));
+   strncpy (response, _200_OK, sizeof (_200_OK));
+
+   size = strlen (response) + 1;
+   bufferevent_write (client->client_bev, (const void *) response, size);
+   free (response);
 }
 
 int main () {
+   //signal(SIGSEGV, handler);
+   //signal(SIGABRT, handler);
    event_set_log_callback(event_log_cbk);
 
-   ThreadPool *workerPool = new ThreadPool (8, true);
-
-   TcpListener *tcpListener = new TcpListener (INADDR_ANY, 8888);
-   tcpListener->onNewConnection(onConnection, workerPool);
-   tcpListener->start();
+   TcpServer *server = new TcpServer (INADDR_ANY, 8888);
+   server->OnNewMessage(onMessage, NULL);
+   server->start();
 
    std::chrono::milliseconds ms(1000);
    while (true) {
