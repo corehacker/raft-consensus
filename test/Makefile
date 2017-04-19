@@ -106,7 +106,8 @@ am_test_libevent_OBJECTS = test_libevent-test-libevent.$(OBJEXT) \
 	../src/utils/test_libevent-thread-job.$(OBJEXT) \
 	../src/utils/test_libevent-thread.$(OBJEXT) \
 	../src/utils/test_libevent-thread-pool.$(OBJEXT) \
-	../src/utils/test_libevent-tcp-listener.$(OBJEXT)
+	../src/utils/test_libevent-tcp-listener.$(OBJEXT) \
+	../src/utils/test_libevent-tcp-server.$(OBJEXT)
 test_libevent_OBJECTS = $(am_test_libevent_OBJECTS)
 test_libevent_LDADD = $(LDADD)
 am_test_linked_hash_map_OBJECTS =  \
@@ -303,7 +304,7 @@ test_thread_pool_LDFLAGS =
 test_thread_pool_SOURCES = test-thread-pool.cpp ../src/utils/thread-job.cpp ../src/utils/thread.cpp ../src/utils/thread-pool.cpp
 test_logger_SOURCES = test-logger.cpp
 test_logger_CPPFLAGS = -I../src/utils
-test_libevent_SOURCES = test-libevent.cpp ../src/utils/thread-job.cpp ../src/utils/thread.cpp ../src/utils/thread-pool.cpp ../src/utils/tcp-listener.cpp
+test_libevent_SOURCES = test-libevent.cpp ../src/utils/thread-job.cpp ../src/utils/thread.cpp ../src/utils/thread-pool.cpp ../src/utils/tcp-listener.cpp ../src/utils/tcp-server.cpp
 test_libevent_CPPFLAGS = -I../src/utils
 ACLOCAL_AMFLAGS = -I m4
 all: all-am
@@ -399,6 +400,9 @@ clean-binPROGRAMS:
 ../src/utils/test_libevent-tcp-listener.$(OBJEXT):  \
 	../src/utils/$(am__dirstamp) \
 	../src/utils/$(DEPDIR)/$(am__dirstamp)
+../src/utils/test_libevent-tcp-server.$(OBJEXT):  \
+	../src/utils/$(am__dirstamp) \
+	../src/utils/$(DEPDIR)/$(am__dirstamp)
 
 test-libevent$(EXEEXT): $(test_libevent_OBJECTS) $(test_libevent_DEPENDENCIES) $(EXTRA_test_libevent_DEPENDENCIES) 
 	@rm -f test-libevent$(EXEEXT)
@@ -443,6 +447,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 include ../src/utils/$(DEPDIR)/test_libevent-tcp-listener.Po
+include ../src/utils/$(DEPDIR)/test_libevent-tcp-server.Po
 include ../src/utils/$(DEPDIR)/test_libevent-thread-job.Po
 include ../src/utils/$(DEPDIR)/test_libevent-thread-pool.Po
 include ../src/utils/$(DEPDIR)/test_libevent-thread.Po
@@ -542,6 +547,20 @@ test_libevent-test-libevent.obj: test-libevent.cpp
 #	$(AM_V_CXX)source='../src/utils/tcp-listener.cpp' object='../src/utils/test_libevent-tcp-listener.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_libevent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/utils/test_libevent-tcp-listener.obj `if test -f '../src/utils/tcp-listener.cpp'; then $(CYGPATH_W) '../src/utils/tcp-listener.cpp'; else $(CYGPATH_W) '$(srcdir)/../src/utils/tcp-listener.cpp'; fi`
+
+../src/utils/test_libevent-tcp-server.o: ../src/utils/tcp-server.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_libevent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../src/utils/test_libevent-tcp-server.o -MD -MP -MF ../src/utils/$(DEPDIR)/test_libevent-tcp-server.Tpo -c -o ../src/utils/test_libevent-tcp-server.o `test -f '../src/utils/tcp-server.cpp' || echo '$(srcdir)/'`../src/utils/tcp-server.cpp
+	$(AM_V_at)$(am__mv) ../src/utils/$(DEPDIR)/test_libevent-tcp-server.Tpo ../src/utils/$(DEPDIR)/test_libevent-tcp-server.Po
+#	$(AM_V_CXX)source='../src/utils/tcp-server.cpp' object='../src/utils/test_libevent-tcp-server.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_libevent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/utils/test_libevent-tcp-server.o `test -f '../src/utils/tcp-server.cpp' || echo '$(srcdir)/'`../src/utils/tcp-server.cpp
+
+../src/utils/test_libevent-tcp-server.obj: ../src/utils/tcp-server.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_libevent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../src/utils/test_libevent-tcp-server.obj -MD -MP -MF ../src/utils/$(DEPDIR)/test_libevent-tcp-server.Tpo -c -o ../src/utils/test_libevent-tcp-server.obj `if test -f '../src/utils/tcp-server.cpp'; then $(CYGPATH_W) '../src/utils/tcp-server.cpp'; else $(CYGPATH_W) '$(srcdir)/../src/utils/tcp-server.cpp'; fi`
+	$(AM_V_at)$(am__mv) ../src/utils/$(DEPDIR)/test_libevent-tcp-server.Tpo ../src/utils/$(DEPDIR)/test_libevent-tcp-server.Po
+#	$(AM_V_CXX)source='../src/utils/tcp-server.cpp' object='../src/utils/test_libevent-tcp-server.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_libevent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/utils/test_libevent-tcp-server.obj `if test -f '../src/utils/tcp-server.cpp'; then $(CYGPATH_W) '../src/utils/tcp-server.cpp'; else $(CYGPATH_W) '$(srcdir)/../src/utils/tcp-server.cpp'; fi`
 
 test_linked_hash_map-test-linked-hash-map.o: test-linked-hash-map.cpp
 	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_linked_hash_map_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT test_linked_hash_map-test-linked-hash-map.o -MD -MP -MF $(DEPDIR)/test_linked_hash_map-test-linked-hash-map.Tpo -c -o test_linked_hash_map-test-linked-hash-map.o `test -f 'test-linked-hash-map.cpp' || echo '$(srcdir)/'`test-linked-hash-map.cpp
