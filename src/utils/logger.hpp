@@ -36,7 +36,7 @@
  *
  * \date   Apr 7, 2017
  *
- * \brief  
+ * \brief
  *
  ******************************************************************************/
 
@@ -97,7 +97,7 @@ class Logger
                mLogQueue.pop_front ();
                mMutex.unlock ();
                std::cout << log->str ();
-               // delete log;
+               delete log;
                fflush (stdout);
             }
             else
@@ -111,8 +111,6 @@ class Logger
    public:
       static Logger& getInstance()
       {
-         printf ("***getInstance\n");
-
          static Logger instance; // Guaranteed to be destroyed.
                                 // Instantiated on first use.
          return instance;
@@ -121,18 +119,16 @@ class Logger
       Logger (std::ostream &o = std::cout) :
             m_file (o)
       {
-         printf ("***Creating thread\n");
          pthread_create (&mThread, NULL, Logger::threadFunc, this);
          std::unique_lock < std::mutex > lk (mStartMutex);
-         printf ("***Waiting for thread creation\n");
          mStartCondition.wait (lk);
-         printf ("***Thread creation successful\n");
       }
 
       template<typename T>
       Logger &operator<< (const T &a)
       {
          std::thread::id threadId = std::this_thread::get_id ();
+         mStartMutex.lock ();
          auto threadEntry = mLogMap.find(threadId);
          if(threadEntry == mLogMap.end()) {
             mLogMap.insert(std::make_pair (threadId, new std::ostringstream ()));
@@ -140,6 +136,7 @@ class Logger
 
          threadEntry = mLogMap.find(threadId);
          (*threadEntry->second) << a;
+         mStartMutex.unlock ();
 
          return *this;
       }
@@ -147,6 +144,8 @@ class Logger
       Logger &operator<< (std::ostream& (*pf) (std::ostream&))
       {
          std::thread::id threadId = std::this_thread::get_id ();
+
+         mStartMutex.lock ();
          auto threadEntry = mLogMap.find(threadId);
 
          if(threadEntry == mLogMap.end()) {
@@ -159,6 +158,7 @@ class Logger
          std::ostringstream *log = new std::ostringstream (threadEntry->second->str());
          threadEntry->second->str("");
          threadEntry->second->clear();
+         mStartMutex.unlock ();
 
          std::lock_guard < std::mutex > lock (mMutex);
          mLogQueue.push_back (log);
