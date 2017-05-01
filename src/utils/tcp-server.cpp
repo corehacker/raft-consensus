@@ -97,6 +97,16 @@ void TcpServer::onError (struct bufferevent *bev, short what, void *ctx)
 
 }
 
+void TcpServer::onTimerExpiry (evutil_socket_t fd, short what, void *ctx)
+{
+   LOG << "Timer expired" << std::endl;
+   local_event_ctxt *local_event = (local_event_ctxt *) ctx;
+   if (local_event->onLocalEvent)
+   {
+      local_event->onLocalEvent (local_event->onLocalEventThis);
+   }
+}
+
 void * TcpServer::workerRoutine (void *arg, struct event_base *base)
 {
    if (NULL == arg || NULL == base) return NULL;
@@ -113,6 +123,19 @@ void * TcpServer::workerRoutine (void *arg, struct event_base *base)
    bufferevent_enable (client->client_bev, EV_READ | EV_WRITE);
 
    event_base_dispatch(base);
+
+   return NULL;
+}
+
+void * TcpServer::localEventRoutine (void *arg, struct event_base *base)
+{
+   LOG << "Running Local Event Job, Base: " << base << std::endl;
+   local_event_ctxt *local_event = (local_event_ctxt *) arg;
+
+   local_event->event = evtimer_new (base, TcpServer::onTimerExpiry, arg);
+   evtimer_add(local_event->event, &local_event->tv);
+
+   event_base_dispatch (base);
 
    return NULL;
 }
@@ -135,6 +158,19 @@ void TcpServer::handleConnection (int client_fd,
    client->tcpServer = this;
    ThreadJob job = ThreadJob (TcpServer::workerRoutine, client);
    mWorkerPool->addJob(job);
+   if (mOnConnection) {
+      mOnConnection (client, mOnConnectionThis);
+   }
+}
+
+void TcpServer::newLocalEvent (OnLocalEvent onLocalEvent, void *this_, struct timeval tv)
+{
+   local_event_ctxt *local_event = (local_event_ctxt *) malloc (sizeof (local_event_ctxt));
+   local_event->onLocalEvent = onLocalEvent;
+   local_event->onLocalEventThis = this_;
+   local_event->tv = tv;
+   ThreadJob job = ThreadJob (TcpServer::localEventRoutine, local_event);
+   mWorkerPool->addJob(job);
 }
 
 int TcpServer::start ()
@@ -152,6 +188,17 @@ void TcpServer::OnNewMessage (OnMessage onMessage, void *this_)
    mOnMessageThis = this_;
 }
 
+void TcpServer::OnNewConnection (OnConnection onConnection, void *this_)
+{
+   mOnConnection = onConnection;
+   mOnConnectionThis = this_;
+}
+
+ThreadPool *TcpServer::getWorkerPool ()
+{
+   return mWorkerPool;
+}
+
 TcpServer::TcpServer (in_addr_t ip, in_port_t port)
 {
    mIp = ip;
@@ -160,6 +207,8 @@ TcpServer::TcpServer (in_addr_t ip, in_port_t port)
    mTcpListener = NULL;
    mOnMessage = NULL;
    mOnMessageThis = NULL;
+   mOnConnection = NULL;
+   mOnConnectionThis = NULL;
 }
 
 TcpServer::~TcpServer()

@@ -76,7 +76,7 @@
 /******************************** ENUMERATIONS ********************************/
 
 /*********************** CLASS/STRUCTURE/UNION DATA TYPES *********************/
-typedef void (*OnConnection) (int client_fd,
+typedef void (*OnNewConnection) (int client_fd,
       struct sockaddr_in *px_sock_addr_in, void *this_);
 
 class TcpClient {
@@ -88,7 +88,7 @@ public:
    TcpListener (in_addr_t ip, in_port_t port);
    ~TcpListener ();
    int start ();
-   void onNewConnection (OnConnection onConnection, void *this_);
+   void onNewConnection (OnNewConnection onConnection, void *this_);
 private:
    static void * threadCbk (void *arg, struct event_base *base);
    void eventDispatch (struct event_base *base);
@@ -96,7 +96,7 @@ private:
    static void evNewConnection(evutil_socket_t fd, short events, void *arg);
    void acceptConnection(evutil_socket_t fd, short events);
 
-   OnConnection mOnConnection;
+   OnNewConnection mOnConnection;
    void *mOnConnectionThis;
    ThreadPool *mThread;
    in_addr_t mIp;

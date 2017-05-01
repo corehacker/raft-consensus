@@ -112,6 +112,7 @@ void TcpListener::eventDispatch (struct event_base *base)
    struct timeval to = {0xFFFFFFFF, 0xFFFFFFFF};
    event_add(mEvent, &to);
 
+   LOG << "Listening on " << mPort << std::endl;
    event_base_dispatch(base);
 }
 
@@ -124,6 +125,11 @@ int TcpListener::start () {
       printf("socket failed");
       exit (-1);
    }
+
+   reuseaddr_on = 1;
+   setsockopt(mFd, SOL_SOCKET, SO_REUSEADDR, &reuseaddr_on,
+       sizeof(reuseaddr_on));
+
    memset(&listen_addr, 0, sizeof(listen_addr));
    listen_addr.sin_family = AF_INET;
    listen_addr.sin_addr.s_addr = mIp;
@@ -133,9 +139,7 @@ int TcpListener::start () {
       err(1, "bind failed");
    if (listen(mFd, 5) < 0)
       err(1, "listen failed");
-   reuseaddr_on = 1;
-   setsockopt(mFd, SOL_SOCKET, SO_REUSEADDR, &reuseaddr_on,
-       sizeof(reuseaddr_on));
+
 
    evutil_make_socket_nonblocking(mFd);
 
@@ -145,7 +149,7 @@ int TcpListener::start () {
    return 0;
 }
 
-void TcpListener::onNewConnection (OnConnection onConnection, void *this_)
+void TcpListener::onNewConnection (OnNewConnection onConnection, void *this_)
 {
    mOnConnection = onConnection;
    mOnConnectionThis = this_;

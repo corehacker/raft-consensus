@@ -78,6 +78,8 @@
 /*********************** CLASS/STRUCTURE/UNION DATA TYPES *********************/
 class TcpServer;
 
+typedef void (*OnLocalEvent) (void *this_);
+
 typedef struct _client_ctxt {
    int client_fd;
    struct event *client_event;
@@ -86,7 +88,18 @@ typedef struct _client_ctxt {
    TcpServer *tcpServer;
 } client_ctxt;
 
+typedef struct _local_event_ctxt {
+   OnLocalEvent onLocalEvent;
+   void *onLocalEventThis;
+   struct timeval tv;
+   struct event *event;
+} local_event_ctxt;
+
 typedef void (*OnMessage) (client_ctxt *client, uint8_t *message, uint32_t length, void *this_);
+
+typedef void (*OnConnection) (client_ctxt *client, void *this_);
+
+
 
 class TcpServer {
 public:
@@ -94,6 +107,11 @@ public:
    ~TcpServer ();
    int start ();
    void OnNewMessage (OnMessage onMessage, void *this_);
+   void OnNewConnection (OnConnection onConnection, void *this_);
+   ThreadPool *getWorkerPool ();
+   void handleConnection (int client_fd,
+                             struct sockaddr_in *px_sock_addr_in);
+   void newLocalEvent (OnLocalEvent onLocalEvent, void *this_, struct timeval tv);
 
 private:
    in_addr_t mIp;
@@ -101,20 +119,24 @@ private:
    ThreadPool *mWorkerPool;
    TcpListener *mTcpListener;
    OnMessage mOnMessage;
+   OnConnection mOnConnection;
    void *mOnMessageThis;
+   void *mOnConnectionThis;
 
    static void onConnection (int client_fd,
                              struct sockaddr_in *px_sock_addr_in, void *this_);
-   void handleConnection (int client_fd,
-                             struct sockaddr_in *px_sock_addr_in);
 
    static void * workerRoutine (void *arg, struct event_base *base);
+
+   static void * localEventRoutine (void *arg, struct event_base *base);
 
    static void onRead (struct bufferevent *bev, void *ctx);
 
    static void onWrite (struct bufferevent *bev, void *ctx);
 
    static void onError (struct bufferevent *bev, short what, void *ctx);
+
+   static void onTimerExpiry (evutil_socket_t fd, short what, void *ctx);
 
    void readMessage (client_ctxt *client, struct bufferevent *bev);
 };
