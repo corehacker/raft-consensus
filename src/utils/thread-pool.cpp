@@ -109,20 +109,17 @@ ThreadPool::threadGetNextJob_ ()
 {
    while (true)
    {
+      std::unique_lock < std::mutex > lk (mMutex);
       if (!mJobQueue.empty ())
       {
          LOG << "New Job" << std::endl;
-         mMutex.lock ();
          ThreadJob &job = mJobQueue.at (0);
          mJobQueue.pop_front ();
-         mMutex.unlock ();
          return job;
 
       }
       else
       {
-         // LOG << "Waiting for job" << std::endl;
-         std::unique_lock < std::mutex > lk (mMutex);
          mCondition.wait (lk);
       }
    }
