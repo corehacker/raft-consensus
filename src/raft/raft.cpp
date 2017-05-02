@@ -263,31 +263,24 @@ static void raft_get_opts_from_args (int argc, char **argv,
 
 static void onMessage (client_ctxt *client, uint8_t *message, uint32_t length, void *this_)
 {
-   char *response;
-   uint32_t size;
-
-   LOG << "New Message" << std::endl;
+   LOG << "New Heartbeat Message" << std::endl;
    LOG << "Read " << length << " bytes from socket." << std::endl;
-   LOG << std::endl << message << std::endl;
-
-   response = (char *) malloc (sizeof (_200_OK));
-   strncpy (response, _200_OK, sizeof (_200_OK));
-
-   size = strlen (response) + 1;
-   bufferevent_write (client->client_bev, (const void *) response, size);
-   free (response);
 }
 
 static void onLocalEvent (void *this_)
 {
-   TcpServer *server = (TcpServer *) this_;
+   client_ctxt *client = (client_ctxt *) this_;
+   TcpServer *server = client->tcpServer;
    LOG << "onLocalEvent" << std::endl;
 
-   struct timeval tv;
+   RAFT_MSG_HEARTBEAT_X x_hb = {{0}};
 
+   bufferevent_write (client->client_bev, (const void *) &x_hb, sizeof (x_hb));
+
+   struct timeval tv;
    tv.tv_sec = 3;
    tv.tv_usec = 0;
-   server->newLocalEvent(onLocalEvent, this_, tv);
+   server->newLocalEvent(onLocalEvent, client, tv);
 }
 
 static void onConnection (client_ctxt *client, void *this_)
@@ -298,7 +291,7 @@ static void onConnection (client_ctxt *client, void *this_)
 
    tv.tv_sec = 3;
    tv.tv_usec = 0;
-   server->newLocalEvent(onLocalEvent, this_, tv);
+   server->newLocalEvent(onLocalEvent, client, tv);
 }
 
 int main (int argc, char **argv)
