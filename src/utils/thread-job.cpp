@@ -55,18 +55,16 @@
 /****************************** LOCAL FUNCTIONS *******************************/
 #include "thread-job.hpp"
 
+std::atomic<uint64_t> ThreadJob::counter {0};   // or {0} for a more C++11 experience
+
 ThreadJob::ThreadJob (ThreadJobRoutine routine, void *arg)
 {
+   counter++;
    this->routine = routine;
    this->arg = arg;
-   this->id++;
 }
 
 ThreadJob::~ThreadJob ()
 {
    this->routine = NULL;
-}
-
-uint64_t ThreadJob::getId() const {
-	return id;
 }

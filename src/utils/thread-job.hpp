@@ -57,14 +57,12 @@ typedef void * (*ThreadJobRoutine) (void *arg, struct event_base *base);
 
 class ThreadJob {
    private:
-	  uint64_t id;
+	  static std::atomic <uint64_t> counter;
    public:
       ThreadJobRoutine routine;
       void *arg;
       ThreadJob (ThreadJobRoutine routine, void *arg);
       ~ThreadJob ();
-
-	uint64_t getId() const;
 };
 
 /***************************** FUNCTION PROTOTYPES ****************************/

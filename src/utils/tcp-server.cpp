@@ -227,6 +227,8 @@ TcpServer::TcpServer (in_addr_t ip, in_port_t port)
    mOnMessageThis = NULL;
    mOnConnection = NULL;
    mOnConnectionThis = NULL;
+   mOnDisconnect = NULL;
+   mOnDisconnectThis = NULL;
 }
 
 TcpServer::~TcpServer()

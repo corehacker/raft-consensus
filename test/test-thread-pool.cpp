@@ -79,7 +79,7 @@ main ()
    std::chrono::milliseconds ms(1000);
    std::this_thread::sleep_for(ms);
    ThreadJob *job = new ThreadJob (routine, NULL);
-   LOG << "Job: " << job->getId() << std::endl;
+   LOG << "Job: " << job->arg << std::endl;
    while (true) {
       pool->addJob(job);
 

@@ -98,7 +98,7 @@ void ThreadPool::createThreads ()
 void
 ThreadPool::addJob (ThreadJob *job)
 {
-   LOG << "Adding Job: " << job->getId() << std::endl;
+   LOG << "Adding Job" << std::endl;
    std::lock_guard < std::mutex > lock (mMutex);
    mJobQueue.push_back (job);
    mCondition.notify_one ();
@@ -113,7 +113,7 @@ ThreadPool::threadGetNextJob_ ()
       if (!mJobQueue.empty ())
       {
          ThreadJob *job = mJobQueue.at (0);
-         LOG << "New Job: " << job->getId() << std::endl;
+         LOG << "New Job" << std::endl;
          mJobQueue.pop_front ();
          return job;
 
