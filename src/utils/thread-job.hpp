@@ -41,6 +41,7 @@
  ******************************************************************************/
 
 #include <iostream>
+#include <atomic>
 
 #ifndef __SRC_UTILS_THREAD_JOB_HPP__
 #define __SRC_UTILS_THREAD_JOB_HPP__
@@ -55,11 +56,15 @@
 typedef void * (*ThreadJobRoutine) (void *arg, struct event_base *base);
 
 class ThreadJob {
+   private:
+	  uint64_t id;
    public:
       ThreadJobRoutine routine;
       void *arg;
       ThreadJob (ThreadJobRoutine routine, void *arg);
       ~ThreadJob ();
+
+	uint64_t getId() const;
 };
 
 /***************************** FUNCTION PROTOTYPES ****************************/

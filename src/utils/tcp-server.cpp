@@ -55,7 +55,7 @@ static Logger &log = Logger::getInstance();
 /************************ STATIC FUNCTION PROTOTYPES **************************/
 
 /****************************** LOCAL FUNCTIONS *******************************/
-void TcpServer::onRead (struct bufferevent *bev, void *ctx)
+void TcpServer::_onRead (struct bufferevent *bev, void *ctx)
 {
    LOG << "Data on socket!!" << std::endl;
 
@@ -87,14 +87,25 @@ void TcpServer::readMessage (client_ctxt *client, struct bufferevent *bev)
    }
 }
 
-void TcpServer::onWrite (struct bufferevent *bev, void *ctx)
+void TcpServer::_onWrite (struct bufferevent *bev, void *ctx)
 {
 
 }
 
-void TcpServer::onError (struct bufferevent *bev, short what, void *ctx)
+void TcpServer::_onError (struct bufferevent *bev, short what, void *ctx)
 {
+	client_ctxt *client = (client_ctxt *) ctx;
+	TcpServer *server = client->tcpServer;
+	server->onError (client, bev, what);
+}
 
+void TcpServer::onError (client_ctxt *client, struct bufferevent *bev, short what)
+{
+	client->disconnected = true;
+	LOG << "onError" << std::endl;
+	if (mOnDisconnect) {
+		mOnDisconnect (client, what, mOnDisconnectThis);
+   }
 }
 
 void TcpServer::onTimerExpiry (evutil_socket_t fd, short what, void *ctx)
@@ -117,8 +128,8 @@ void * TcpServer::workerRoutine (void *arg, struct event_base *base)
    client->client_bev = bufferevent_socket_new (base,
          client->client_fd, 0);
 
-   bufferevent_setcb (client->client_bev, TcpServer::onRead,
-                      TcpServer::onWrite, TcpServer::onError, client);
+   bufferevent_setcb (client->client_bev, TcpServer::_onRead,
+                      TcpServer::_onWrite, TcpServer::_onError, client);
 
    bufferevent_enable (client->client_bev, EV_READ | EV_WRITE);
 
@@ -156,7 +167,8 @@ void TcpServer::handleConnection (int client_fd,
    client->client_fd = client_fd;
    client->px_sock_addr_in = px_sock_addr_in;
    client->tcpServer = this;
-   ThreadJob job = ThreadJob (TcpServer::workerRoutine, client);
+   client->disconnected = false;
+   ThreadJob *job = new ThreadJob (TcpServer::workerRoutine, client);
    mWorkerPool->addJob(job);
    if (mOnConnection) {
       mOnConnection (client, mOnConnectionThis);
@@ -169,7 +181,7 @@ void TcpServer::newLocalEvent (OnLocalEvent onLocalEvent, void *this_, struct ti
    local_event->onLocalEvent = onLocalEvent;
    local_event->onLocalEventThis = this_;
    local_event->tv = tv;
-   ThreadJob job = ThreadJob (TcpServer::localEventRoutine, local_event);
+   ThreadJob *job = new ThreadJob (TcpServer::localEventRoutine, local_event);
    mWorkerPool->addJob(job);
 }
 
@@ -192,6 +204,12 @@ void TcpServer::OnNewConnection (OnConnection onConnection, void *this_)
 {
    mOnConnection = onConnection;
    mOnConnectionThis = this_;
+}
+
+void TcpServer::OnPeerDisconnect (OnDisconnect onDisconnect, void *this_)
+{
+	mOnDisconnect = onDisconnect;
+	mOnDisconnectThis = this_;
 }
 
 ThreadPool *TcpServer::getWorkerPool ()

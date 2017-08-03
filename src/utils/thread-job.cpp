@@ -59,9 +59,14 @@ ThreadJob::ThreadJob (ThreadJobRoutine routine, void *arg)
 {
    this->routine = routine;
    this->arg = arg;
+   this->id++;
 }
 
 ThreadJob::~ThreadJob ()
 {
    this->routine = NULL;
+}
+
+uint64_t ThreadJob::getId() const {
+	return id;
 }

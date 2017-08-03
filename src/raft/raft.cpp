@@ -270,6 +270,7 @@ static void onMessage (client_ctxt *client, uint8_t *message, uint32_t length, v
 static void onLocalEvent (void *this_)
 {
    client_ctxt *client = (client_ctxt *) this_;
+   if (client->disconnected) return;
    TcpServer *server = client->tcpServer;
    LOG << "onLocalEvent" << std::endl;
 
@@ -294,6 +295,11 @@ static void onConnection (client_ctxt *client, void *this_)
    server->newLocalEvent(onLocalEvent, client, tv);
 }
 
+static void onDisconnect (client_ctxt *client, short what, void *this_)
+{
+	LOG << "onDisconnect" << std::endl;
+}
+
 int main (int argc, char **argv)
 {
    uint32_t i = 0;
@@ -310,6 +316,7 @@ int main (int argc, char **argv)
    TcpServer *server = new TcpServer (INADDR_ANY, px_raft_args->listenPort);
    server->OnNewMessage(onMessage, NULL);
    server->OnNewConnection(onConnection, server);
+   server->OnPeerDisconnect(onDisconnect, server);
    server->start();
 
    for (i = 0; i < px_raft_args->numPorts; i++)

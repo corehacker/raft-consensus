@@ -82,15 +82,15 @@ Thread::run ()
       LOG << "Not creating event base: " << mEventBase << std::endl;
    }
    while (true) {
-      ThreadJob job = mGetJob (mGetJobThis);
+      ThreadJob *job = mGetJob (mGetJobThis);
       runJob (job);
    }
 }
 
 void
-Thread::runJob (ThreadJob &job)
+Thread::runJob (ThreadJob *job)
 {
-   job.routine (job.arg, mEventBase);
+   job->routine (job->arg, mEventBase);
 }
 
 Thread::Thread (ThreadGetJob getJob, void *this_)

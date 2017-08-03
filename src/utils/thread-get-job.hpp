@@ -55,7 +55,7 @@ extern  "C"
 /******************************** ENUMERATIONS ********************************/
 
 /*********************** CLASS/STRUCTURE/UNION DATA TYPES *********************/
-typedef ThreadJob & (*ThreadGetJob) (void *this_);
+typedef ThreadJob * (*ThreadGetJob) (void *this_);
 
 /***************************** FUNCTION PROTOTYPES ****************************/
 

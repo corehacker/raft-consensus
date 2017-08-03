@@ -86,6 +86,7 @@ typedef struct _client_ctxt {
    struct bufferevent *client_bev;
    struct sockaddr_in *px_sock_addr_in;
    TcpServer *tcpServer;
+   bool disconnected;
 } client_ctxt;
 
 typedef struct _local_event_ctxt {
@@ -99,6 +100,7 @@ typedef void (*OnMessage) (client_ctxt *client, uint8_t *message, uint32_t lengt
 
 typedef void (*OnConnection) (client_ctxt *client, void *this_);
 
+typedef void (*OnDisconnect) (client_ctxt *client, short what, void *this_);
 
 
 class TcpServer {
@@ -108,6 +110,7 @@ public:
    int start ();
    void OnNewMessage (OnMessage onMessage, void *this_);
    void OnNewConnection (OnConnection onConnection, void *this_);
+   void OnPeerDisconnect (OnDisconnect onDisconnect, void *this_);
    ThreadPool *getWorkerPool ();
    void handleConnection (int client_fd,
                              struct sockaddr_in *px_sock_addr_in);
@@ -120,8 +123,10 @@ private:
    TcpListener *mTcpListener;
    OnMessage mOnMessage;
    OnConnection mOnConnection;
+   OnDisconnect mOnDisconnect;
    void *mOnMessageThis;
    void *mOnConnectionThis;
+   void *mOnDisconnectThis;
 
    static void onConnection (int client_fd,
                              struct sockaddr_in *px_sock_addr_in, void *this_);
@@ -130,15 +135,18 @@ private:
 
    static void * localEventRoutine (void *arg, struct event_base *base);
 
-   static void onRead (struct bufferevent *bev, void *ctx);
+   static void _onRead (struct bufferevent *bev, void *ctx);
 
-   static void onWrite (struct bufferevent *bev, void *ctx);
+   static void _onWrite (struct bufferevent *bev, void *ctx);
 
-   static void onError (struct bufferevent *bev, short what, void *ctx);
+   static void _onError (struct bufferevent *bev, short what, void *ctx);
 
    static void onTimerExpiry (evutil_socket_t fd, short what, void *ctx);
 
    void readMessage (client_ctxt *client, struct bufferevent *bev);
+
+   void onError (client_ctxt *client, struct bufferevent *bev, short what);
+
 };
 
 /***************************** FUNCTION PROTOTYPES ****************************/

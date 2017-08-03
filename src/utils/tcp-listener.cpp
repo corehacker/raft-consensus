@@ -87,7 +87,7 @@ void TcpListener::acceptConnection(evutil_socket_t fd, short events) {
       }
    }
 
-   ThreadJob job = ThreadJob (TcpListener::threadCbk, this);
+   ThreadJob *job = new ThreadJob (TcpListener::threadCbk, this);
    mThread->addJob(job);
 }
 
@@ -143,7 +143,8 @@ int TcpListener::start () {
 
    evutil_make_socket_nonblocking(mFd);
 
-   ThreadJob job = ThreadJob (TcpListener::threadCbk, this);
+   ThreadJob *job = new ThreadJob (TcpListener::threadCbk, this);
+   LOG << "Adding job for listen socket: arg: " << job->arg << std::endl;
    mThread->addJob(job);
 
    return 0;

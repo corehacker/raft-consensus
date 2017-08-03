@@ -64,7 +64,7 @@ class Thread {
       Thread (ThreadGetJob getJob, void *this_);
       Thread (ThreadGetJob getJob, void *this_, bool base = false);
       ~Thread ();
-      void addJob (ThreadJob &job);
+      void addJob (ThreadJob *job);
    private:
       pthread_t         mThread;
       ThreadGetJob      mGetJob;
@@ -74,7 +74,7 @@ class Thread {
 
       static void *threadFunc (void *this_);
       void run ();
-      void runJob (ThreadJob &job);
+      void runJob (ThreadJob *job);
 };
 
 /***************************** FUNCTION PROTOTYPES ****************************/
