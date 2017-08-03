@@ -4,6 +4,8 @@ compiler:
   - g++
 
 script: |
+  cd deps && ./protobuf.sh
+  cd ..
   mkdir -p m4
   autoreconf --install
   ./configure
