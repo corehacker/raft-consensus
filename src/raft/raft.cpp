@@ -75,6 +75,7 @@
 #include "utils/tcp-listener.hpp"
 #include "utils/tcp-server.hpp"
 #include "utils/logger.hpp"
+#include "protos/c++/communication.pb.h"
 
 /********************************* CONSTANTS **********************************/
 
@@ -275,6 +276,16 @@ static void onLocalEvent (void *this_)
    LOG << "onLocalEvent" << std::endl;
 
    RAFT_MSG_HEARTBEAT_X x_hb = {{0}};
+
+   raft::Header *header = new raft::Header();
+   header->set_type(raft::MailType::REQUEST);
+   header->set_id("Random String");
+   header->set_mails(0, raft::Mails::HEARTBEAT);
+   raft::Mail *mail = new raft::Mail();
+   mail->set_allocated_header(header);
+
+   raft::HeartBeat *hb = new raft::HeartBeat();
+   hb->
 
    bufferevent_write (client->client_bev, (const void *) &x_hb, sizeof (x_hb));
 

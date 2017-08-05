@@ -100,10 +100,10 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__dirstamp = $(am__leading_dot)dirstamp
-am_raft_consensus_OBJECTS = raft/raft.$(OBJEXT) \
-	utils/thread-job.$(OBJEXT) utils/thread.$(OBJEXT) \
-	utils/thread-pool.$(OBJEXT) utils/tcp-listener.$(OBJEXT) \
-	utils/tcp-server.$(OBJEXT)
+am_raft_consensus_OBJECTS = protos/c++/communication.pb.$(OBJEXT) \
+	raft/raft.$(OBJEXT) utils/thread-job.$(OBJEXT) \
+	utils/thread.$(OBJEXT) utils/thread-pool.$(OBJEXT) \
+	utils/tcp-listener.$(OBJEXT) utils/tcp-server.$(OBJEXT)
 raft_consensus_OBJECTS = $(am_raft_consensus_OBJECTS)
 raft_consensus_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_@AM_V@)
@@ -261,6 +261,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AM_CPPFLAGS = -I..
 raft_consensus_SOURCES = \
+						protos/c++/communication.pb.cc\
 						raft/raft.cpp\
 						utils/thread-job.cpp\
 						utils/thread.cpp\
@@ -271,7 +272,7 @@ raft_consensus_SOURCES = \
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .cpp .o .obj
+.SUFFIXES: .cc .cpp .o .obj
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -343,6 +344,14 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+protos/c++/$(am__dirstamp):
+	@$(MKDIR_P) protos/c++
+	@: > protos/c++/$(am__dirstamp)
+protos/c++/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) protos/c++/$(DEPDIR)
+	@: > protos/c++/$(DEPDIR)/$(am__dirstamp)
+protos/c++/communication.pb.$(OBJEXT): protos/c++/$(am__dirstamp) \
+	protos/c++/$(DEPDIR)/$(am__dirstamp)
 raft/$(am__dirstamp):
 	@$(MKDIR_P) raft
 	@: > raft/$(am__dirstamp)
@@ -374,18 +383,36 @@ raft-consensus$(EXEEXT): $(raft_consensus_OBJECTS) $(raft_consensus_DEPENDENCIES
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
+	-rm -f protos/c++/*.$(OBJEXT)
 	-rm -f raft/*.$(OBJEXT)
 	-rm -f utils/*.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@protos/c++/$(DEPDIR)/communication.pb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@raft/$(DEPDIR)/raft.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/tcp-listener.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/tcp-server.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/thread-job.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/thread-pool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@utils/$(DEPDIR)/thread.Po@am__quote@
+
+.cc.o:
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
+@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCXX_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXXCOMPILE) -c -o $@ $<
+
+.cc.obj:
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.obj$$||'`;\
+@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ `$(CYGPATH_W) '$<'` &&\
+@am__fastdepCXX_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -518,6 +545,8 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
+	-rm -f protos/c++/$(DEPDIR)/$(am__dirstamp)
+	-rm -f protos/c++/$(am__dirstamp)
 	-rm -f raft/$(DEPDIR)/$(am__dirstamp)
 	-rm -f raft/$(am__dirstamp)
 	-rm -f utils/$(DEPDIR)/$(am__dirstamp)
@@ -531,7 +560,7 @@ clean: clean-am
 clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
 
 distclean: distclean-am
-	-rm -rf raft/$(DEPDIR) utils/$(DEPDIR)
+	-rm -rf protos/c++/$(DEPDIR) raft/$(DEPDIR) utils/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -577,7 +606,7 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -rf raft/$(DEPDIR) utils/$(DEPDIR)
+	-rm -rf protos/c++/$(DEPDIR) raft/$(DEPDIR) utils/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

@@ -5346,7 +5346,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 # AC_CHECK_HEADER_STDBOOL
 
 CXXFLAGS="$CXXFLAGS -Wall -std=c++0x"
-LIBS="-lpthread -lrt -lm -levent $LIBS"
+LIBS="-lpthread -lrt -lm -levent -lprotobuf $LIBS"
 
 ##########################################################################
 # check for ch-pal library
